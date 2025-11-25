@@ -1,48 +1,39 @@
 package com.karetlabs.erastos.nav
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.karetlabs.erastos.ui.screens.AddBookScreen
-import com.karetlabs.erastos.ui.screens.AddBookshelfScreen
-import com.karetlabs.erastos.ui.screens.BookshelfDetailScreen
-import com.karetlabs.erastos.ui.screens.HomeScreen
+import androidx.navigation.toRoute
+import com.karetlabs.erastos.addbook.AddBookScreen
+import com.karetlabs.erastos.addbook.presentation.AddBookDestination
+import com.karetlabs.erastos.bookshelf.AddBookshelfScreen
+import com.karetlabs.erastos.bookshelf.BookshelfDetailScreen
+import com.karetlabs.erastos.bookshelf.presentation.AddBookshelfDestination
+import com.karetlabs.erastos.bookshelf.presentation.BookshelfDetailDestination
+import com.karetlabs.erastos.home.HomeScreen
+import com.karetlabs.erastos.home.presentation.HomeDestination
 
 @Composable
 fun AppNavHost(
     navController: NavHostController
 ) {
-    NavHost(navController = navController, startDestination = Screen.Home.route) {
-        composable(Screen.Home.route) {
+    NavHost(navController = navController, startDestination = HomeDestination) {
+        composable<HomeDestination> {
             HomeScreen(navController = navController)
         }
-        composable(Screen.BookshelfDetail.route + "/{bookshelfId}") { backStackEntry ->
-            val bookshelfId = backStackEntry.arguments?.getString("bookshelfId")?.toIntOrNull()
-            if (bookshelfId != null) {
-                BookshelfDetailScreen(navController = navController, bookshelfId = bookshelfId)
-            } else {
-                Text(text = "Error: Bookshelf ID is missing or invalid.")
-            }
+        composable<BookshelfDetailDestination> { backStackEntry ->
+            val destination: BookshelfDetailDestination = backStackEntry.toRoute()
+            val bookshelfId = destination.bookshelfId
+            BookshelfDetailScreen(navController = navController, bookshelfId = bookshelfId)
         }
-        composable(Screen.AddBook.route + "/{bookshelfId}") { backStackEntry ->
-            val bookshelfId = backStackEntry.arguments?.getString("bookshelfId")?.toIntOrNull()
-            if (bookshelfId != null) {
-                AddBookScreen(navController = navController, bookshelfId = bookshelfId)
-            } else {
-                Text(text = "Error: Bookshelf ID is missing for Add Book screen.")
-            }
+        composable<AddBookDestination> { backStackEntry ->
+            val bookshelf: AddBookDestination = backStackEntry.toRoute()
+            val bookshelfId = bookshelf.bookshelfId
+            AddBookScreen(navController = navController, bookshelfId = bookshelfId)
         }
-        composable(Screen.AddBookshelf.route) {
+        composable<AddBookshelfDestination> {
             AddBookshelfScreen(navController = navController)
         }
     }
-}
-
-sealed class Screen(val route: String) {
-    object Home : Screen("home")
-    object BookshelfDetail : Screen("bookshelf_detail")
-    object AddBook : Screen("add_book")
-    object AddBookshelf : Screen("add_bookshelf")
 }

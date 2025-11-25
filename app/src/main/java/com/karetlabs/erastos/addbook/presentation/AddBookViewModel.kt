@@ -1,4 +1,4 @@
-package com.karetlabs.erastos.viewmodel
+package com.karetlabs.erastos.addbook.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,6 +10,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+enum class SearchType {
+    TITLE, ISBN
+}
 
 @HiltViewModel
 class AddBookViewModel @Inject constructor(private val repository: LibraryRepository) : ViewModel() {
@@ -23,10 +27,14 @@ class AddBookViewModel @Inject constructor(private val repository: LibraryReposi
         }
     }
 
-    fun searchBooks(query: String) {
+    fun searchBooks(type: SearchType, query: String) {
+        val formattedQuery = when (type) {
+            SearchType.TITLE -> query
+            SearchType.ISBN -> "isbn:$query"
+        }
         viewModelScope.launch {
             try {
-                val result = repository.searchBooks(query)
+                val result = repository.searchBooks(formattedQuery)
                 _searchResults.value = result.items
             } catch (e: Exception) {
                 // Handle error

@@ -1,3 +1,6 @@
 package com.karetlabs.erastos.library.presentation
 
-interface PresentationDestination
+interface PresentationDestination {
+    val fromDeepLink: Boolean
+        get() = false
+}

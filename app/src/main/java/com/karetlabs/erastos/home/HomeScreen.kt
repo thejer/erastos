@@ -1,4 +1,4 @@
-package com.karetlabs.erastos.ui.screens
+package com.karetlabs.erastos.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -24,9 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.karetlabs.erastos.bookshelf.presentation.AddBookshelfDestination
+import com.karetlabs.erastos.bookshelf.presentation.BookshelfDetailDestination
 import com.karetlabs.erastos.data.model.Bookshelf
-import com.karetlabs.erastos.nav.Screen
-import com.karetlabs.erastos.viewmodel.HomeViewModel
+import com.karetlabs.erastos.home.presentation.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,7 +48,7 @@ fun HomeScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { navController.navigate(Screen.AddBookshelf.route) }) {
+            FloatingActionButton(onClick = { navController.navigate(AddBookshelfDestination) }) {
             }
         }
     ) { paddingValues ->
@@ -63,7 +64,7 @@ fun HomeScreen(
                 LazyColumn {
                     items(bookshelves) { bookshelf ->
                         BookshelfCard(bookshelf = bookshelf) {
-                            navController.navigate(Screen.BookshelfDetail.route + "/${bookshelf.id}")
+                            navController.navigate(BookshelfDetailDestination(bookshelf.id))
                         }
                     }
                 }
