@@ -1,0 +1,63 @@
+# IntelliJ IDEA
+.idea/
+# Except for the following files/directories in .idea
+!.idea/encodings.xml
+!.idea/vcs.xml
+!.idea/workspace.xml
+!.idea/assetWizardSettings.xml
+!.idea/caches/build_file_checksums.ser
+
+# Gradle
+.gradle/
+build/
+local.properties
+.DS_Store
+
+# Android Studio Noramlly
+*.iml
+.cxx/
+*.apk
+*.aab
+*.aar
+*.ap_
+*.class
+*.jar
+*.dex
+
+# Project specific
+app/build/
+app/.cxx/
+app/*.iml
+
+# Crashlytics/Fabric
+crashlytics-build.properties
+
+# Google Services (if used)
+google-services.json
+
+# Keystore files
+*.jks
+*.keystore
+
+# External native build files
+.externalNativeBuild
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/test_output/
+
+# Kotlin Multiplatform / Native
+.kotlin/
+.kotlin_gradle/
+*.kmmbridge.json
+*.kmp.module
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+.#*
+*.log
+*.env
