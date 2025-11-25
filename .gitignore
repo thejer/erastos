@@ -3,9 +3,7 @@
 # Except for the following files/directories in .idea
 !.idea/encodings.xml
 !.idea/vcs.xml
-!.idea/workspace.xml
 !.idea/assetWizardSettings.xml
-!.idea/caches/build_file_checksums.ser
 
 # Gradle
 .gradle/
