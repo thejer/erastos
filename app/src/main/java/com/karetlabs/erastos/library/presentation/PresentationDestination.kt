@@ -1,0 +1,3 @@
+package com.karetlabs.erastos.library.presentation
+
+interface PresentationDestination
