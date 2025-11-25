@@ -1,4 +1,4 @@
-package com.karetlabs.erastos.ui.screens
+package com.karetlabs.erastos.bookshelf
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.karetlabs.erastos.viewmodel.AddBookshelfViewModel
+import com.karetlabs.erastos.bookshelf.presentation.AddBookshelfViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

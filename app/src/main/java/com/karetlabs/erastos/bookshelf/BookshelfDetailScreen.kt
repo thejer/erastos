@@ -1,4 +1,4 @@
-package com.karetlabs.erastos.ui.screens
+package com.karetlabs.erastos.bookshelf
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,9 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.karetlabs.erastos.addbook.presentation.AddBookDestination
+import com.karetlabs.erastos.bookshelf.presentation.BookshelfDetailViewModel
 import com.karetlabs.erastos.data.model.Book
-import com.karetlabs.erastos.nav.Screen
-import com.karetlabs.erastos.viewmodel.BookshelfDetailViewModel
+import com.karetlabs.erastos.library.presentation.doOnScreenCreate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,6 +38,10 @@ fun BookshelfDetailScreen(
     val bookshelf by bookshelfDetailViewModel.bookshelf.collectAsState()
     val books by bookshelfDetailViewModel.books.collectAsState()
 
+    doOnScreenCreate {
+        bookshelfDetailViewModel.initialize(bookshelfId)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -45,12 +50,12 @@ fun BookshelfDetailScreen(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
-                navigationIcon = {
-                }
+                navigationIcon = {}
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { navController.navigate(Screen.AddBook.route + "/$bookshelfId") }) {
+            FloatingActionButton(onClick = { navController.navigate(AddBookDestination(bookshelfId)) }) {
+                Text("+")
             }
         }
     ) { paddingValues ->

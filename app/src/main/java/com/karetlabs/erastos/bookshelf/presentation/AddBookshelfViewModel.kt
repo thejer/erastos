@@ -1,4 +1,4 @@
-package com.karetlabs.erastos.viewmodel
+package com.karetlabs.erastos.bookshelf.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

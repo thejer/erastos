@@ -1,6 +1,5 @@
-package com.karetlabs.erastos.viewmodel
+package com.karetlabs.erastos.bookshelf.presentation
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.karetlabs.erastos.data.model.Book
@@ -16,10 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class BookshelfDetailViewModel @Inject constructor(
     private val repository: LibraryRepository,
-    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-
-    private val bookshelfId: Int = checkNotNull(savedStateHandle["bookshelfId"])
 
     private val _bookshelf = MutableStateFlow<Bookshelf?>(null)
     val bookshelf: StateFlow<Bookshelf?> = _bookshelf.asStateFlow()
@@ -27,7 +23,7 @@ class BookshelfDetailViewModel @Inject constructor(
     private val _books = MutableStateFlow<List<Book>>(emptyList())
     val books: StateFlow<List<Book>> = _books.asStateFlow()
 
-    init {
+    fun initialize(bookshelfId: Int) {
         viewModelScope.launch {
             repository.getBookshelfById(bookshelfId).collect {
                 _bookshelf.value = it
@@ -40,7 +36,7 @@ class BookshelfDetailViewModel @Inject constructor(
         }
     }
 
-    fun addBook(title: String, author: String) {
+    fun addBook(bookshelfId: Int, title: String, author: String) {
         viewModelScope.launch {
             repository.insertBook(Book(title = title, author = author, bookshelfId = bookshelfId))
         }

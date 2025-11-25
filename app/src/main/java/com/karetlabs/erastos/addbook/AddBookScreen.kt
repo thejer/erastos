@@ -1,7 +1,9 @@
-package com.karetlabs.erastos.ui.screens
+package com.karetlabs.erastos.addbook
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,11 +14,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,13 +29,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.karetlabs.erastos.viewmodel.AddBookViewModel
+import com.karetlabs.erastos.R
+import com.karetlabs.erastos.addbook.presentation.AddBookViewModel
+import com.karetlabs.erastos.addbook.presentation.SearchType
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +51,7 @@ fun AddBookScreen(
     var title by remember { mutableStateOf("") }
     var author by remember { mutableStateOf("") }
     var searchQuery by remember { mutableStateOf("") }
+    var selectedSearchType by remember { mutableStateOf(SearchType.TITLE) } // New state for search type
 
     val searchResults by addBookViewModel.searchResults.collectAsStateWithLifecycle()
 
@@ -49,8 +59,14 @@ fun AddBookScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Add New Book") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                ),
                 navigationIcon = {
-
+                    IconButton(onClick = { navController.popBackStack() }) {
+                       Icon(painter = painterResource(R.drawable.ic_back), contentDescription = "back")
+                    }
                 }
             )
         }
@@ -62,15 +78,35 @@ fun AddBookScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            // Search type selection
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                Button(
+                    onClick = { selectedSearchType = SearchType.TITLE },
+                    enabled = selectedSearchType != SearchType.TITLE
+                ) {
+                    Text("Search by Title")
+                }
+                Button(
+                    onClick = { selectedSearchType = SearchType.ISBN },
+                    enabled = selectedSearchType != SearchType.ISBN
+                ) {
+                    Text("Search by ISBN")
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = {
                     searchQuery = it
                     if (searchQuery.isNotBlank()) {
-                        addBookViewModel.searchBooks(searchQuery)
+                        addBookViewModel.searchBooks(selectedSearchType, searchQuery)
                     }
                 },
-                label = { Text("Search Books") },
+                label = { Text("Search by ${selectedSearchType.name}") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
