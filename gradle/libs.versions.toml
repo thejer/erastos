@@ -10,6 +10,8 @@ composeBom = "2025.11.01"
 navigationCompose = "2.9.6"
 room = "2.8.4"
 retrofit = "3.0.0"
+mlkitBarcodeScanning = "17.0.3"
+cameraX = "1.3.3"
 junit = "4.13.2"
 junitExt = "1.3.0"
 espresso = "3.7.0"
@@ -54,6 +56,14 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", v
 # Network
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+
+# ML Kit Barcode Scanning
+mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkitBarcodeScanning" }
+
+# CameraX
+camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraX" }
+camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
+camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
