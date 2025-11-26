@@ -24,5 +24,5 @@ data class ImageLinks(
 )
 
 data class VolumesResponse(
-    val items: List<Volume>
+    val items: List<Volume>?
 )

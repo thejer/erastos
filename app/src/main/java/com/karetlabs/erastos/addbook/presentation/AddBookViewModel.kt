@@ -35,7 +35,7 @@ class AddBookViewModel @Inject constructor(private val repository: LibraryReposi
         viewModelScope.launch {
             try {
                 val result = repository.searchBooks(formattedQuery)
-                _searchResults.value = result.items
+                _searchResults.value = result.items.orEmpty()
             } catch (e: Exception) {
                 // Handle error
             }

@@ -79,6 +79,14 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
 
+    // ML Kit Barcode Scanning
+    implementation(libs.mlkit.barcode.scanning)
+
+    // CameraX
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.test.ext.junit)
