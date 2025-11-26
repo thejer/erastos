@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "com.karetlabs.erastos"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -78,6 +78,14 @@ dependencies {
     // Network
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+
+    // ML Kit Barcode Scanning
+    implementation(libs.mlkit.barcode.scanning)
+
+    // CameraX
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
 
     // Testing
     testImplementation(libs.junit)

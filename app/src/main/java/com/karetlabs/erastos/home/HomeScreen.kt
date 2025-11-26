@@ -29,7 +29,6 @@ import com.karetlabs.erastos.bookshelf.presentation.BookshelfDetailDestination
 import com.karetlabs.erastos.data.model.Bookshelf
 import com.karetlabs.erastos.home.presentation.HomeViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     navController: NavController,
@@ -37,6 +36,15 @@ fun HomeScreen(
 ) {
     val bookshelves by homeViewModel.bookshelves.collectAsState()
 
+    HomeView(navController, bookshelves)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HomeView(
+    navController: NavController,
+    bookshelves: List<Bookshelf>
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -91,6 +99,6 @@ fun BookshelfCard(bookshelf: Bookshelf, onClick: (Bookshelf) -> Unit) {
 
 @Preview(showBackground = true)
 @Composable
-fun HomeScreenPreview() {
-    HomeScreen(navController = rememberNavController())
+fun HomePreview() {
+    HomeView(navController = rememberNavController(), bookshelves = emptyList())
 }
