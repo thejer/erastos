@@ -38,7 +38,7 @@ class BookshelfDetailViewModel @Inject constructor(
 
     fun addBook(bookshelfId: Int, title: String, author: String) {
         viewModelScope.launch {
-            repository.insertBook(Book(title = title, author = author, bookshelfId = bookshelfId))
+            repository.insertBook(Book(title = title, author = author, coverUrl = "", bookshelfId = bookshelfId))
         }
     }
 }

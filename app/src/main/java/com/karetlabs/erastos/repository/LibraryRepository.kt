@@ -36,4 +36,6 @@ class LibraryRepository @Inject constructor(
     suspend fun searchBooks(query: String): VolumesResponse {
         return remoteDataSource.searchBooks(query)
     }
+
+    fun getAllBooks(): Flow<List<Book>> = bookDao.getAllBooks()
 }

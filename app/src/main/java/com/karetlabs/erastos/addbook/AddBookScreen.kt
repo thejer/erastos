@@ -40,7 +40,7 @@ import androidx.navigation.compose.rememberNavController
 import com.karetlabs.erastos.R
 import com.karetlabs.erastos.addbook.presentation.AddBookViewModel
 import com.karetlabs.erastos.addbook.presentation.SearchType
-import com.karetlabs.erastos.ui.components.BarcodeScanner
+import com.karetlabs.erastos.library.ui.components.BarcodeScanner
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

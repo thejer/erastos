@@ -8,8 +8,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.karetlabs.erastos.library.ui.theme.ErastosTheme
 import com.karetlabs.erastos.nav.AppNavHost
-import com.karetlabs.erastos.ui.theme.ErastosTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

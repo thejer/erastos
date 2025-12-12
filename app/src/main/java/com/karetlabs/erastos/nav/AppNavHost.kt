@@ -11,16 +11,16 @@ import com.karetlabs.erastos.bookshelf.AddBookshelfScreen
 import com.karetlabs.erastos.bookshelf.BookshelfDetailScreen
 import com.karetlabs.erastos.bookshelf.presentation.AddBookshelfDestination
 import com.karetlabs.erastos.bookshelf.presentation.BookshelfDetailDestination
-import com.karetlabs.erastos.home.HomeScreen
-import com.karetlabs.erastos.home.presentation.HomeDestination
+import com.karetlabs.erastos.home.LibraryHomeScreen
+import com.karetlabs.erastos.home.presentation.LibraryHomeDestination
 
 @Composable
 fun AppNavHost(
     navController: NavHostController
 ) {
-    NavHost(navController = navController, startDestination = HomeDestination) {
-        composable<HomeDestination> {
-            HomeScreen(navController = navController)
+    NavHost(navController = navController, startDestination = LibraryHomeDestination) {
+        composable<LibraryHomeDestination> {
+            LibraryHomeScreen()
         }
         composable<BookshelfDetailDestination> { backStackEntry ->
             val destination: BookshelfDetailDestination = backStackEntry.toRoute()
