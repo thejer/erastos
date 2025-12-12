@@ -1,4 +1,4 @@
-package com.karetlabs.erastos.ui.theme
+package com.karetlabs.erastos.library.ui.theme
 
 import androidx.compose.ui.graphics.Color
 // ---------- Light ----------

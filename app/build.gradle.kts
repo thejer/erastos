@@ -7,6 +7,14 @@ plugins {
     alias(libs.plugins.serialization)
 }
 
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "com.google.mlkit" && requested.name == "barcode-scanning") {
+            useVersion("17.3.0")
+        }
+    }
+}
+
 android {
     namespace = "com.karetlabs.erastos"
     compileSdk = 36
@@ -79,13 +87,19 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
 
-    // ML Kit Barcode Scanning
-    implementation(libs.mlkit.barcode.scanning)
+    implementation(libs.barcode.scanning)
 
     // CameraX
+    implementation(libs.camera.core)
     implementation(libs.camera.camera2)
     implementation(libs.camera.lifecycle)
     implementation(libs.camera.view)
+
+    // Coil compose image loader
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+    implementation(libs.coil.gif)
+    implementation(libs.coil.svg)
 
     // Testing
     testImplementation(libs.junit)

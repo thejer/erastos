@@ -4,4 +4,4 @@ import com.karetlabs.erastos.library.presentation.PresentationDestination
 import kotlinx.serialization.Serializable
 
 @Serializable
-object HomeDestination : PresentationDestination
+object LibraryHomeDestination : PresentationDestination
