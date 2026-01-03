@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.karetlabs.erastos.library.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -9,19 +11,14 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.karetlabs.erastos.R
 
-private val bodyFontFamily = FontFamily(
+val bodyFontFamily = FontFamily(
     Font(R.font.inter_body_thin, FontWeight.Thin),
     Font(R.font.inter_body_extra_light, FontWeight.ExtraLight),
     Font(R.font.inter_body_light, FontWeight.Light),
@@ -33,7 +30,7 @@ private val bodyFontFamily = FontFamily(
     Font(R.font.inter_body_black, FontWeight.Black),
 )
 
-private val headerFontFamily = FontFamily(
+val headerFontFamily = FontFamily(
     Font(R.font.inter_header_thin, FontWeight.Thin),
     Font(R.font.inter_header_extralight, FontWeight.ExtraLight),
     Font(R.font.inter_header_light, FontWeight.Light),
@@ -45,152 +42,126 @@ private val headerFontFamily = FontFamily(
     Font(R.font.inter_header_black, FontWeight.Black),
 )
 
-@Immutable
-data class AppDimensions(
-    val radiusSmall: Dp = 6.dp,
-    val radiusMedium: Dp = 8.dp,
-    val radiusBase: Dp = 10.dp,
-    val radiusLarge: Dp = 14.dp,
-    val radiusXl: Dp = 18.dp,
-    val radiusRounded: Dp = 100.dp,
-
-    val spaceXSmall: Dp = 4.dp,
-    val spaceSmall: Dp = 8.dp,
-    val spaceMedium: Dp = 12.dp,
-    val spaceBase: Dp = 16.dp,
-    val spaceLarge: Dp = 20.dp,
-    val spaceXl: Dp = 24.dp,
-
-    // Icon sizes
-    val iconSmall: Dp = 16.dp,
-    val iconMedium: Dp = 20.dp,
-    val iconBase: Dp = 24.dp,
-    val iconLarge: Dp = 32.dp,
-    val iconXl: Dp = 48.dp,
-)
-
-val LocalDimensions = staticCompositionLocalOf { AppDimensions() }
-
-private const val lineHeightMultiplier = 1.5f
-private fun lh(fontSizeSp: Int) = (fontSizeSp * lineHeightMultiplier).sp
-
-@Immutable
-data class AppTypography(
-    // CSS: --font-size: 16px, --font-weight-normal: 400, --font-weight-medium: 500
-    val small: TextStyle = TextStyle(
-        fontFamily = bodyFontFamily,
-        fontSize = 14.sp,
-        lineHeight = lh(14),
-        fontWeight = FontWeight.Normal
-    ),
-    val base: TextStyle = TextStyle(
-        fontFamily = bodyFontFamily,
-        fontSize = 16.sp,
-        lineHeight = lh(16),
-        fontWeight = FontWeight.Normal
-    ),
-    val large: TextStyle = TextStyle(
-        fontFamily = bodyFontFamily,
-        fontSize = 18.sp,
-        lineHeight = lh(18),
-        fontWeight = FontWeight.Medium
-    ),
-    val xl: TextStyle = TextStyle(
-        fontFamily = bodyFontFamily,
-        fontSize = 20.sp,
-        lineHeight = lh(20),
-        fontWeight = FontWeight.Medium
-    ),
-    val x2l: TextStyle = TextStyle(
-        fontFamily = bodyFontFamily,
-        fontSize = 24.sp,
-        lineHeight = lh(24),
-        fontWeight = FontWeight.Medium
-    ),
-    val headlineLarge: TextStyle = x2l.copy(
-        fontFamily = headerFontFamily,
-        fontWeight = FontWeight.SemiBold
-    ),
-    val headlineMedium: TextStyle = xl.copy(
-        fontFamily = headerFontFamily,
-        fontWeight = FontWeight.SemiBold
-    ),
-    val headlineSmall: TextStyle = large.copy(
-        fontFamily = headerFontFamily,
-        fontWeight = FontWeight.Normal
-    ),
-    val titleMedium: TextStyle = base.copy(
-        fontFamily = headerFontFamily,
-        fontWeight = FontWeight.Bold
-    ),
-    val weightNormal: FontWeight = FontWeight.Normal, // 400
-    val weightMedium: FontWeight = FontWeight.Medium, // 500
-    // Body/labels: Inter
-    val bodyLarge: TextStyle = base,
-    val labelLarge: TextStyle = base.copy(fontWeight = weightMedium),
-    val bodyMedium: TextStyle = small,
-    val labelMedium: TextStyle = small.copy(fontWeight = weightMedium),
-)
+val LocalDimensions = staticCompositionLocalOf { AppDimensions }
 
 val LocalTypography = staticCompositionLocalOf { AppTypography() }
 
 fun materialTypography(type: AppTypography = AppTypography()): Typography =
     Typography(
-        // Headers: Merriweather
-        headlineLarge = type.x2l.copy(
-            fontFamily = headerFontFamily,
-            fontWeight = FontWeight.Bold
-        ),
-        headlineMedium = type.xl.copy(fontFamily = headerFontFamily, fontWeight = FontWeight.Bold),
-        headlineSmall = type.large.copy(fontFamily = headerFontFamily, fontWeight = FontWeight.Normal),
+        // Display
+        displayLarge = type.displayLarge,
+        displayMedium = type.displayMedium,
+        displaySmall = type.displaySmall,
 
-        // Titles: Merriweather (sub-headers)
-        titleMedium = type.base.copy(
-            fontFamily = headerFontFamily,
-            fontWeight = FontWeight.Bold
-        ),
+        // Headline
+        headlineLarge = type.headlineLarge,
+        headlineMedium = type.headlineMedium,
+        headlineSmall = type.headlineSmall,
 
-        // Body/labels: Inter
-        bodyLarge = type.base,
-        labelLarge = type.base.copy(fontWeight = type.weightMedium),
-        bodyMedium = type.small,
-        labelMedium = type.small.copy(fontWeight = type.weightMedium),
+        // Title
+        titleLarge = type.titleLarge,
+        titleMedium = type.titleMedium,
+        titleSmall = type.titleSmall,
+
+        // Body
+        bodyLarge = type.bodyLarge,
+        bodyMedium = type.bodyMedium,
+        bodySmall = type.bodySmall,
+
+        // Label
+        labelLarge = type.labelLarge,
+        labelMedium = type.labelMedium,
+        labelSmall = type.labelSmall,
     )
 
 private val LightScheme = lightColorScheme(
+    // Primary
     primary = primary,
     onPrimary = onPrimary,
+    primaryContainer = primaryContainer,
+    onPrimaryContainer = onPrimaryContainer,
+
+    // Secondary
     secondary = secondary,
     onSecondary = onSecondary,
-    tertiary = accent,
-    onTertiary = onAccent,
-    error = destructive,
-    onError = onDestructive,
+    secondaryContainer = secondaryContainer,
+    onSecondaryContainer = onSecondaryContainer,
+
+    // Tertiary
+    tertiary = tertiary,
+    onTertiary = onTertiary,
+    tertiaryContainer = tertiaryContainer,
+    onTertiaryContainer = onTertiaryContainer,
+
+    // Error
+    error = error,
+    onError = onError,
+    errorContainer = errorContainer,
+    onErrorContainer = onErrorContainer,
+
+    // Background & Surface
     background = background,
     onBackground = foreground,
-    surface = card,
-    onSurface = cardForeground,
-    surfaceVariant = muted,
-    onSurfaceVariant = mutedForeground,
-    outline = border,
+    surface = surface,
+    onSurface = onSurface,
+    surfaceVariant = surfaceVariant,
+    onSurfaceVariant = onSurfaceVariant,
+
+    // Outline & Other
+    outline = outline,
+    outlineVariant = outlineVariant,
+    scrim = scrim,
+    inverseSurface = inverseSurface,
+    inverseOnSurface = inverseOnSurface,
+    inversePrimary = inversePrimary,
+
+    // Elevation tint
+    surfaceTint = surfaceTint,
 )
 
 private val DarkScheme = darkColorScheme(
+    // Primary
     primary = primaryDark,
     onPrimary = onPrimaryDark,
+    primaryContainer = primaryContainerDark,
+    onPrimaryContainer = onPrimaryContainerDark,
+
+    // Secondary
     secondary = secondaryDark,
     onSecondary = onSecondaryDark,
-    tertiary = accentDark,
-    onTertiary = onAccentDark,
-    error = destructiveDark,
-    onError = onDestructiveDark,
+    secondaryContainer = secondaryContainerDark,
+    onSecondaryContainer = onSecondaryContainerDark,
+
+    // Tertiary
+    tertiary = tertiaryDark,
+    onTertiary = onTertiaryDark,
+    tertiaryContainer = tertiaryContainerDark,
+    onTertiaryContainer = onTertiaryContainerDark,
+
+    // Error
+    error = errorDark,
+    onError = onErrorDark,
+    errorContainer = errorContainerDark,
+    onErrorContainer = onErrorContainerDark,
+
+    // Background & Surface
     background = backgroundDark,
     onBackground = foregroundDark,
-    surface = cardDark,
-    onSurface = cardForegroundDark,
-    surfaceVariant = mutedDark,
-    onSurfaceVariant = mutedForegroundDark,
-    outline = borderDark,
+    surface = surfaceDark,
+    onSurface = onSurfaceDark,
+    surfaceVariant = surfaceVariantDark,
+    onSurfaceVariant = onSurfaceVariantDark,
+
+    // Outline & Other
+    outline = outlineDark,
+    outlineVariant = outlineVariantDark,
+    scrim = scrimDark,
+    inverseSurface = inverseSurfaceDark,
+    inverseOnSurface = inverseOnSurfaceDark,
+    inversePrimary = inversePrimaryDark,
+
+    // Elevation tint
+    surfaceTint = surfaceTintDark,
 )
 
 private fun shapes(d: AppDimensions) = Shapes(
@@ -216,18 +187,16 @@ fun ErastosTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-
-    val dimens = AppDimensions()
     val type = AppTypography()
 
     CompositionLocalProvider(
-        LocalDimensions provides dimens,
+        LocalDimensions provides AppDimensions,
         LocalTypography provides type,
     ) {
         MaterialTheme(
             colorScheme = if (darkTheme) DarkScheme else LightScheme,
             typography = materialTypography(type),
-            shapes = shapes(dimens),
+            shapes = shapes(AppDimensions),
             content = content
         )
     }

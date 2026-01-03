@@ -8,7 +8,12 @@ data class Book(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val title: String,
-    val author: String,
+    val authors: List<String>,
     val coverUrl: String,
+    val description: String,
+    val pageCount: Int,
+    val publishedDate: String,
+    val publisher: String,
+    val isbn: String,
     val bookshelfId: Int // Foreign key to Bookshelf
 )

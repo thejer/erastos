@@ -9,8 +9,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import com.karetlabs.erastos.library.ui.DevicePreviews
+import com.karetlabs.erastos.library.ui.theme.ComponentDimensions
+import com.karetlabs.erastos.library.ui.theme.CustomTypography
 import com.karetlabs.erastos.library.ui.theme.ErastosTheme
 import com.karetlabs.erastos.library.ui.theme.dimension
 
@@ -26,6 +27,7 @@ fun CategoryChip(
         label = {
             Text(
                 text = text,
+                style = CustomTypography.chipLabel,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -39,7 +41,7 @@ fun CategoryChip(
             labelColor = colorScheme.onSurface,
         ),
         border = null,
-        modifier = Modifier.height(34.dp)
+        modifier = Modifier.height(ComponentDimensions.chipHeight)
     )
 }
 

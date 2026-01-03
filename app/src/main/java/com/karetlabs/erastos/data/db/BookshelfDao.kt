@@ -13,7 +13,7 @@ interface BookshelfDao {
     fun getAllBookshelves(): Flow<List<Bookshelf>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(bookshelf: Bookshelf)
+    suspend fun insert(bookshelf: Bookshelf): Long
 
     @Query("SELECT * FROM bookshelves WHERE id = :id")
     fun getBookshelfById(id: Int): Flow<Bookshelf>

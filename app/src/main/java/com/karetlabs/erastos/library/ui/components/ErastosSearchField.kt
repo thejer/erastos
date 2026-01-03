@@ -23,9 +23,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
 import com.karetlabs.erastos.R
 import com.karetlabs.erastos.library.ui.DevicePreviews
+import com.karetlabs.erastos.library.ui.theme.ComponentDimensions
 import com.karetlabs.erastos.library.ui.theme.ErastosTheme
 import com.karetlabs.erastos.library.ui.theme.dimension
 import com.karetlabs.erastos.library.ui.theme.typography
@@ -45,7 +45,7 @@ fun ErastosSearchField(
 
     ErastosTextField(
         modifier = modifier
-            .heightIn(min = 44.dp)
+            .heightIn(min = ComponentDimensions.searchBarHeightCompact)
             .clip(RoundedCornerShape(dimension.radiusXl))
             .clickable(onClick = onClick)
             .focusRequester(focusRequester)
@@ -69,7 +69,7 @@ fun ErastosSearchField(
             Icon(
                 painter = getPainter(R.drawable.ic_search),
                 contentDescription = stringResource(R.string.search),
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(ComponentDimensions.searchBarIconSize),
                 tint = colorScheme.onSurfaceVariant
             )
         },
@@ -84,7 +84,7 @@ fun ErastosSearchField(
             keyboardType = KeyboardType.Text,
             imeAction = ImeAction.Done
         ),
-        style = typography.bodyMedium,
+        style = typography.bodyLarge
     )
 }
 

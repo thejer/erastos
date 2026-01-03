@@ -23,6 +23,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.karetlabs.erastos.library.ui.theme.CustomTypography
 import com.karetlabs.erastos.library.ui.theme.dimension
 import com.karetlabs.erastos.library.ui.theme.typography
 
@@ -46,8 +47,8 @@ fun ErastosLabeledTextField(
     singleLine: Boolean = true,
     height: Dp = 56.dp,
     shape: Shape = RoundedCornerShape(dimension.radiusRounded),
-    contentPadding: PaddingValues = PaddingValues(horizontal = dimension.spaceBase),
-    labelStyle: TextStyle = typography.labelMedium,
+    contentPadding: PaddingValues = PaddingValues(horizontal = dimension.paddingMedium),
+    labelStyle: TextStyle = CustomTypography.fieldLabel,
     textStyle: TextStyle = typography.bodyMedium,
     trailingIcon: @Composable (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
@@ -74,7 +75,7 @@ fun ErastosLabeledTextField(
             style = labelStyle.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
         )
 
-        Spacer(Modifier.height(dimens.spaceSmall))
+        Spacer(Modifier.height(dimens.componentSpacingSmall))
 
         ErastosTextField(
             state = state,

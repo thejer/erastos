@@ -1,4 +1,4 @@
-package com.karetlabs.erastos.home
+package com.karetlabs.erastos.home.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,22 +16,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.karetlabs.erastos.data.model.Book
+import com.karetlabs.erastos.library.getAuthorsString
+import com.karetlabs.erastos.library.ui.theme.ComponentDimensions
+import com.karetlabs.erastos.library.ui.theme.CustomTypography
 import com.karetlabs.erastos.library.ui.theme.dimension
 
 @Composable
 fun BookCardItemView(
     book: Book,
 ) {
-    val d = dimension
-    val cs = MaterialTheme.colorScheme
 
     Card(
-        shape = RoundedCornerShape(d.radiusLarge),
-        colors = CardDefaults.cardColors(containerColor = cs.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(dimension.radiusLarge),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = ComponentDimensions.cardElevation),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column {
@@ -42,24 +42,24 @@ fun BookCardItemView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(0.63f)
-                    .clip(RoundedCornerShape(topStart = d.radiusLarge, topEnd = d.radiusLarge))
+                    .clip(RoundedCornerShape(topStart = dimension.radiusLarge, topEnd = dimension.radiusLarge))
             )
 
             Column(
-                modifier = Modifier.padding(d.spaceBase),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+                modifier = Modifier.padding(dimension.paddingMedium),
+                verticalArrangement = Arrangement.spacedBy(dimension.componentSpacingSmall)
             ) {
                 Text(
                     text = book.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = cs.onSurface,
+                    style = CustomTypography.bookTitle,
+                    color = colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = book.author,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = cs.onSurfaceVariant,
+                    text = book.getAuthorsString(),
+                    style = CustomTypography.bookAuthor,
+                    color = colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -73,9 +73,15 @@ fun BookCardItemView(
 private fun PreviewBookCardItem() {
     val book = Book(
         title = "The Great Gatsby",
-        author = "F. Scott Fitzgerald",
+        authors = listOf("F. Scott Fitzgerald"),
         coverUrl = "https://picsum.photos/seed/picsum/200/300",
-        bookshelfId = 1
+        bookshelfId = 1,
+        id = 1,
+        description = "The Great Gatsby is a novel written by American author F. Scott Fitzgerald that tells the story of the fabulously wealthy Jay Gatsby and his love for the beautiful Daisy Buchanan.",
+        pageCount = 180,
+        publishedDate = "1925-04-10",
+        publisher = "Scribner",
+        isbn = "9780141439518",
     )
     BookCardItemView(book)
 }
