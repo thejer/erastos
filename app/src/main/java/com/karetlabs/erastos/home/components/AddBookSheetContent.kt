@@ -1,4 +1,4 @@
-package com.karetlabs.erastos.home
+package com.karetlabs.erastos.home.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Surface
@@ -30,12 +30,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
+import com.karetlabs.erastos.R
 import com.karetlabs.erastos.library.ui.DevicePreviews
 import com.karetlabs.erastos.library.ui.components.ErastosLabeledTextField
 import com.karetlabs.erastos.library.ui.components.TextFieldLength
+import com.karetlabs.erastos.library.ui.theme.ComponentDimensions
+import com.karetlabs.erastos.library.ui.theme.CustomTypography
 import com.karetlabs.erastos.library.ui.theme.dimension
 import com.karetlabs.erastos.library.ui.theme.typography
 
@@ -81,30 +84,33 @@ fun AddBookBottomSheetContent(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = dimens.spaceBase, vertical = dimens.spaceBase)
+            .padding(
+                horizontal = dimens.screenPaddingHorizontal,
+                vertical = dimens.screenPaddingVertical
+            )
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Add Book", style = typo.headlineMedium)
+            Text(text = stringResource(R.string.add_book), style = typo.headlineSmall)
             TextButton(onClick = onDoneClick) {
                 Text(
-                    text = "Done",
-                    style = typo.labelMedium.copy(color = colorScheme.primary)
+                    text = stringResource(R.string.add_book_done),
+                    style = CustomTypography.buttonText.copy(color = colorScheme.primary)
                 )
             }
         }
 
-        Spacer(Modifier.height(dimens.spaceBase))
+        Spacer(Modifier.height(dimens.componentSpacingLarge))
 
         AddBookModeSwitcher(
             selected = mode,
             onSelect = { mode = it }
         )
 
-        Spacer(Modifier.height(dimens.spaceXl))
+        Spacer(Modifier.height(dimens.paddingLarge))
 
         when (mode) {
             AddBookMode.ManualEntry -> ManualEntryContent(
@@ -152,18 +158,18 @@ private fun AddBookModeSwitcher(
     ) {
         Row(
             modifier = Modifier
-                .padding(dimens.spaceXSmall)
+                .padding(dimens.paddingTiny)
                 .fillMaxWidth()
         ) {
             ModeChip(
-                text = "ISBN Scan",
+                text = stringResource(R.string.add_book_mode_isbn_scan),
                 isSelected = selected == AddBookMode.IsbnScan,
                 onClick = { onSelect(AddBookMode.IsbnScan) },
                 modifier = Modifier.weight(1f)
             )
-            Spacer(Modifier.width(dimens.spaceXSmall))
+            Spacer(Modifier.width(dimens.paddingTiny))
             ModeChip(
-                text = "Manual Entry",
+                text = stringResource(R.string.add_book_mode_manual_entry),
                 isSelected = selected == AddBookMode.ManualEntry,
                 onClick = { onSelect(AddBookMode.ManualEntry) },
                 modifier = Modifier.weight(1f)
@@ -180,19 +186,18 @@ private fun ModeChip(
     modifier: Modifier = Modifier
 ) {
     val dimens = dimension
-    val typo = typography
 
     val bg =
         if (isSelected) colorScheme.background
         else colorScheme.surfaceVariant
 
     val border =
-        if (isSelected) BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
+        if (isSelected) BorderStroke(dimens.dividerThickness, colorScheme.outline.copy(alpha = 0.3f))
         else null
 
     Surface(
         modifier = modifier
-            .height(40.dp)
+            .height(ComponentDimensions.buttonHeightText)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(dimens.radiusRounded),
         color = bg,
@@ -201,7 +206,7 @@ private fun ModeChip(
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(
                 text = text,
-                style = typo.labelMedium.copy(
+                style = CustomTypography.chipLabel.copy(
                     color = if (isSelected)
                         colorScheme.primary
                     else
@@ -229,7 +234,7 @@ private fun ManualEntryContent(
 
     Column {
         ErastosLabeledTextField(
-            label = "Title",
+            label = stringResource(R.string.add_book_title),
             value = title,
             onValueChange = onTitleChange,
             fieldLength = TextFieldLength.NAME,
@@ -237,10 +242,10 @@ private fun ManualEntryContent(
             keyboardCapitalization = KeyboardCapitalization.Words
         )
 
-        Spacer(Modifier.height(dimens.spaceMedium))
+        Spacer(Modifier.height(dimens.componentSpacingMedium))
 
         ErastosLabeledTextField(
-            label = "Author",
+            label = stringResource(R.string.add_book_author),
             value = author,
             onValueChange = onAuthorChange,
             fieldLength = TextFieldLength.NAME,
@@ -248,10 +253,10 @@ private fun ManualEntryContent(
             keyboardCapitalization = KeyboardCapitalization.Words
         )
 
-        Spacer(Modifier.height(dimens.spaceMedium))
+        Spacer(Modifier.height(dimens.componentSpacingMedium))
 
         ErastosLabeledTextField(
-            label = "Category",
+            label = stringResource(R.string.add_book_category),
             value = category,
             onValueChange = onCategoryChange,
             fieldLength = TextFieldLength.NAME,
@@ -259,26 +264,31 @@ private fun ManualEntryContent(
             keyboardCapitalization = KeyboardCapitalization.Words
         )
 
-        Spacer(Modifier.height(dimens.spaceMedium))
+        Spacer(Modifier.height(dimens.componentSpacingMedium))
 
         ErastosLabeledTextField(
-            label = "ISBN (Optional)",
+            label = stringResource(R.string.add_book_isbn_optional),
             value = isbn,
             onValueChange = onIsbnChange,
             fieldLength = TextFieldLength.ISBN,
             colors = textFieldColors,
             keyboardType = KeyboardType.Number,
-            placeholder = "Enter ISBN if available"
+            placeholder = stringResource(R.string.add_book_enter_isbn_if_available)
         )
 
-        Spacer(Modifier.height(dimens.spaceXl))
+        Spacer(Modifier.height(dimens.paddingLarge))
 
         Button(
             onClick = onAddBookClick,
-            modifier = Modifier.fillMaxWidth().height(52.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ComponentDimensions.buttonHeightFilled),
             shape = RoundedCornerShape(dimens.radiusRounded)
         ) {
-            Text("Add Book")
+            Text(
+                text = stringResource(R.string.add_book),
+                style = CustomTypography.buttonText
+            )
         }
     }
 }
@@ -296,24 +306,33 @@ private fun IsbnScanContent(
     Column {
         Button(
             onClick = onScanClick,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ComponentDimensions.textFieldHeight),
             shape = RoundedCornerShape(dimens.radiusRounded)
         ) {
-            Text("🔍  Scan Barcode")
+            Text(
+                text = "🔍  Scan Barcode",
+                style = CustomTypography.buttonText
+            )
         }
 
-        Spacer(Modifier.height(dimens.spaceLarge))
+        Spacer(Modifier.height(dimens.componentSpacingLarge))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Divider(Modifier.weight(1f))
-            Text(" or enter manually ")
-            Divider(Modifier.weight(1f))
+            HorizontalDivider(Modifier.weight(1f))
+            Text(
+                text = stringResource(R.string.add_book_or_enter_manually),
+                style = CustomTypography.metadata,
+                color = colorScheme.onSurfaceVariant
+            )
+            HorizontalDivider(Modifier.weight(1f))
         }
 
-        Spacer(Modifier.height(dimens.spaceLarge))
+        Spacer(Modifier.height(dimens.componentSpacingLarge))
 
         ErastosLabeledTextField(
-            label = "ISBN Number",
+            label = stringResource(R.string.add_book_search_anything_title_author_isbn),
             value = isbn,
             onValueChange = onIsbnChange,
             fieldLength = TextFieldLength.ISBN,
@@ -321,14 +340,19 @@ private fun IsbnScanContent(
             keyboardType = KeyboardType.Number
         )
 
-        Spacer(Modifier.height(dimens.spaceXl))
+        Spacer(Modifier.height(dimens.paddingLarge))
 
         Button(
             onClick = onSearchBookClick,
-            modifier = Modifier.fillMaxWidth().height(52.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ComponentDimensions.buttonHeightFilled),
             shape = RoundedCornerShape(dimens.radiusRounded)
         ) {
-            Text("Search Book")
+            Text(
+                text = stringResource(R.string.add_book_search_book),
+                style = CustomTypography.buttonText
+            )
         }
     }
 }

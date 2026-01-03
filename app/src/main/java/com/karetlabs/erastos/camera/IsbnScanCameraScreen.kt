@@ -37,10 +37,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.karetlabs.erastos.R
+import com.karetlabs.erastos.library.ui.theme.Border
+import com.karetlabs.erastos.library.ui.theme.ComponentDimensions
 import com.karetlabs.erastos.library.ui.theme.dimension
 import com.karetlabs.erastos.library.ui.theme.typography
 
@@ -96,7 +99,7 @@ fun IsbnScanCameraScreen(
         Box(
             modifier = Modifier
                 .statusBarsPadding()
-                .padding(dimens.spaceBase)
+                .padding(dimens.paddingMedium)
                 .size(dimens.iconXl)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.75f))
@@ -105,14 +108,14 @@ fun IsbnScanCameraScreen(
         ) {
             Text(
                 text = "✕",
-                style = typo.large.copy(color = MaterialTheme.colorScheme.onSurface)
+                style = typo.titleLarge.copy(color = MaterialTheme.colorScheme.onSurface)
             )
         }
 
         ScanFrameOverlay(
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(horizontal = dimens.spaceXl),
+                .padding(horizontal = dimens.screenPaddingHorizontal),
             accent = MaterialTheme.colorScheme.primary
         )
 
@@ -120,8 +123,8 @@ fun IsbnScanCameraScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding()
-                .padding(horizontal = dimens.spaceXl)
-                .padding(bottom = dimens.spaceXl),
+                .padding(horizontal = dimens.screenPaddingHorizontal)
+                .padding(bottom = dimens.paddingLarge),
             titleStyle = typo.titleMedium,
             bodyStyle = typo.bodyMedium
         )
@@ -140,25 +143,25 @@ private fun NoCameraPermissionView(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(dimension.spaceXl),
+                .padding(dimension.paddingLarge),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Camera permission is required to scan ISBN barcodes.",
+                text = stringResource(R.string.isbn_scan_camera_permission_prompt),
                 style = typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onBackground)
             )
 
-            Spacer(Modifier.height(dimension.spaceBase))
+            Spacer(Modifier.height(dimension.componentSpacingLarge))
 
             Button(onClick = { requestPermission.launch(Manifest.permission.CAMERA) }) {
-                Text("Allow camera")
+                Text(stringResource(R.string.isbn_scan_allow_camera))
             }
 
-            Spacer(Modifier.height(dimension.spaceSmall))
+            Spacer(Modifier.height(dimension.componentSpacingSmall))
 
             TextButton(onClick = onClose) {
-                Text("Close")
+                Text(stringResource(R.string.isbn_scan_camera_close))
             }
         }
     }
@@ -179,8 +182,8 @@ private fun InstructionCard(
     ) {
         Column(
             modifier = Modifier.padding(
-                horizontal = dimens.spaceLarge,
-                vertical = dimens.spaceBase
+                horizontal = dimens.paddingMedium,
+                vertical = dimens.paddingMedium
             ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -189,17 +192,17 @@ private fun InstructionCard(
                 style = bodyStyle.copy(color = MaterialTheme.colorScheme.primary)
             )
 
-            Spacer(Modifier.height(dimens.spaceSmall))
+            Spacer(Modifier.height(dimens.componentSpacingSmall))
 
             Text(
-                text = "Align barcode within frame",
+                text = stringResource(R.string.isbn_scan_align_barcode_within_frame),
                 style = titleStyle.copy(color = MaterialTheme.colorScheme.onSurface)
             )
 
-            Spacer(Modifier.height(dimens.spaceXSmall))
+            Spacer(Modifier.height(dimens.paddingTiny))
 
             Text(
-                text = "ISBN will be detected automatically",
+                text = stringResource(R.string.isbn_scan_isbn_will_be_detected_automatically),
                 style = bodyStyle.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
             )
         }
@@ -212,9 +215,9 @@ private fun ScanFrameOverlay(
     accent: Color
 ) {
     val dimens = dimension
-    val frameHeight = 220.dp
-    val corner = 28.dp
-    val stroke = 4.dp
+    val frameHeight = ComponentDimensions.bookCoverHeightMedium + dimens.space28
+    val corner = dimens.space28
+    val stroke = dimens.space4
 
     Box(
         modifier = modifier
@@ -232,8 +235,8 @@ private fun ScanFrameOverlay(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(2.dp)
-                .padding(horizontal = dimens.spaceXl)
+                .height(Border.medium)
+                .padding(horizontal = dimens.screenPaddingHorizontal)
                 .background(accent)
         )
     }
@@ -247,19 +250,41 @@ private fun Brackets(
     corner: Dp
 ) {
     Box(modifier = modifier) {
-        fun h(width: Dp) = Modifier.width(width).height(stroke).background(color)
-        fun v(height: Dp) = Modifier.width(stroke).height(height).background(color)
+        fun h(width: Dp) = Modifier
+            .width(width)
+            .height(stroke)
+            .background(color)
+        fun v(height: Dp) = Modifier
+            .width(stroke)
+            .height(height)
+            .background(color)
 
-        Box(Modifier.align(Alignment.TopStart).then(h(corner)))
-        Box(Modifier.align(Alignment.TopStart).then(v(corner)))
+        Box(Modifier
+            .align(Alignment.TopStart)
+            .then(h(corner)))
+        Box(Modifier
+            .align(Alignment.TopStart)
+            .then(v(corner)))
 
-        Box(Modifier.align(Alignment.TopEnd).then(h(corner)))
-        Box(Modifier.align(Alignment.TopEnd).then(v(corner)))
+        Box(Modifier
+            .align(Alignment.TopEnd)
+            .then(h(corner)))
+        Box(Modifier
+            .align(Alignment.TopEnd)
+            .then(v(corner)))
 
-        Box(Modifier.align(Alignment.BottomStart).then(h(corner)))
-        Box(Modifier.align(Alignment.BottomStart).then(v(corner)))
+        Box(Modifier
+            .align(Alignment.BottomStart)
+            .then(h(corner)))
+        Box(Modifier
+            .align(Alignment.BottomStart)
+            .then(v(corner)))
 
-        Box(Modifier.align(Alignment.BottomEnd).then(h(corner)))
-        Box(Modifier.align(Alignment.BottomEnd).then(v(corner)))
+        Box(Modifier
+            .align(Alignment.BottomEnd)
+            .then(h(corner)))
+        Box(Modifier
+            .align(Alignment.BottomEnd)
+            .then(v(corner)))
     }
 }

@@ -1,6 +1,5 @@
 package com.karetlabs.erastos.home
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -30,25 +29,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.karetlabs.erastos.R
 import com.karetlabs.erastos.camera.IsbnScanCameraScreen
 import com.karetlabs.erastos.data.model.Book
 import com.karetlabs.erastos.data.model.Bookshelf
+import com.karetlabs.erastos.home.components.AddBookBottomSheetContent
+import com.karetlabs.erastos.home.components.BookCardItemView
+import com.karetlabs.erastos.home.components.BooksSearchResultSheetContent
 import com.karetlabs.erastos.home.presentation.BottomSheetType.ADD_BOOK
 import com.karetlabs.erastos.home.presentation.BottomSheetType.ERROR
+import com.karetlabs.erastos.home.presentation.BottomSheetType.NEW_BOOK_SEARCH
 import com.karetlabs.erastos.home.presentation.BottomSheetType.NONE
 import com.karetlabs.erastos.home.presentation.BottomSheetType.SCAN_ISBN
-import com.karetlabs.erastos.home.presentation.BottomSheetType.SEARCHING
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.AddBookClickEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.BookShelfSelectEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.DismissBottomSheetEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.ScanIsbnClickEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.ScreenCreatedEvent
+import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.SelectSearchBookResult
+import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.StartNewBookSearchEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenIntent.BookShelfSelectIntent
 import com.karetlabs.erastos.home.presentation.LibraryHomeViewModel
+import com.karetlabs.erastos.home.presentation.SearchType
+import com.karetlabs.erastos.library.getAuthorsString
 import com.karetlabs.erastos.library.presentation.doOnScreenCreate
 import com.karetlabs.erastos.library.presentation.mvi.observableViewState
 import com.karetlabs.erastos.library.presentation.mvi.subscribeForIntents
@@ -56,6 +62,8 @@ import com.karetlabs.erastos.library.ui.DevicePreviews
 import com.karetlabs.erastos.library.ui.components.CategoryChip
 import com.karetlabs.erastos.library.ui.components.ErastosBottomSheet
 import com.karetlabs.erastos.library.ui.components.ErastosSearchField
+import com.karetlabs.erastos.library.ui.components.VerticalSpacer
+import com.karetlabs.erastos.library.ui.theme.CustomTypography
 import com.karetlabs.erastos.library.ui.theme.ErastosTheme
 import com.karetlabs.erastos.library.ui.theme.dimension
 import com.karetlabs.erastos.library.ui.theme.typography
@@ -80,12 +88,12 @@ fun LibraryHomeScreen(
         onBookshelfSelected = {
             viewModel.onEvent(BookShelfSelectEvent(it))
         },
-        onAddBookClick = { viewModel.onEvent(AddBookClickEvent)}
+        onAddBookClick = { viewModel.onEvent(AddBookClickEvent) }
     )
 
     ErastosBottomSheet(
         visible = viewState.shouldOpenBottomSheet,
-        onDismissRequest = {viewModel.onEvent(DismissBottomSheetEvent)}
+        onDismissRequest = { viewModel.onEvent(DismissBottomSheetEvent) }
     ) {
         when (viewState.bottomSheetType) {
             ERROR -> {}
@@ -97,25 +105,27 @@ fun LibraryHomeScreen(
                     onAddBookClick = { _, _, _, _ -> }
                 )
             }
+
             SCAN_ISBN -> {
                 IsbnScanCameraScreen(
                     onClose = { viewModel.onEvent(DismissBottomSheetEvent) },
-                    onIsbnDetected = {
-                        Log.d("jerrydev", "LibraryHomeScreen: ISBN $it")
-                        viewModel.onEvent(DismissBottomSheetEvent)
+                    onIsbnDetected = { isbn ->
+                        viewModel.onEvent(StartNewBookSearchEvent(searchType = SearchType.ISBN, query = isbn))
                     }
                 )
             }
-            SEARCHING -> {
-                AddBookBottomSheetContent(
-                    onDoneClick = { viewModel.onEvent(DismissBottomSheetEvent) },
-                    onScanClick = { viewModel.onEvent(ScanIsbnClickEvent) },
-                    onSearchBookClick = {},
-                    onAddBookClick = { _, _, _, _ -> }
+
+            NEW_BOOK_SEARCH -> {
+                BooksSearchResultSheetContent(
+                    query = viewState.newBookSearchQuery,
+                    searchType = viewState.newBookSearchType,
+                    isSearching = viewState.isNewBookSearchLoading,
+                    foundBooks = viewState.newBookSearchResults,
+                    onContinueClicked = { viewModel.onEvent(SelectSearchBookResult(it)) }
                 )
             }
-            NONE -> {}
 
+            NONE -> Unit
         }
     }
 }
@@ -141,11 +151,11 @@ private fun HomeView(
             ) {
                 Row(
                     modifier = Modifier.padding(
-                        horizontal = dimension.spaceBase,
-                        vertical = dimension.spaceSmall
+                        horizontal = dimension.paddingMedium,
+                        vertical = dimension.paddingSmall
                     ),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(dimension.spaceSmall)
+                    horizontalArrangement = Arrangement.spacedBy(dimension.componentSpacingSmall)
                 ) {
                     Icon(
                         tint = colorScheme.onPrimaryContainer,
@@ -155,8 +165,8 @@ private fun HomeView(
                     )
 
                     Text(
-                        text = "Add Book",
-                        style = typography.bodyMedium,
+                        text = stringResource(R.string.home_add_book_button),
+                        style = CustomTypography.buttonText,
                         color = colorScheme.onPrimaryContainer
                     )
                 }
@@ -174,11 +184,11 @@ private fun HomeView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        horizontal = dimension.spaceBase,
-                        vertical = dimension.spaceSmall
+                        horizontal = dimension.screenPaddingHorizontal,
+                        vertical = dimension.paddingSmall
                     ),
-                horizontalArrangement = Arrangement.spacedBy(dimension.spaceSmall),
-                contentPadding = PaddingValues(vertical = 2.dp)
+                horizontalArrangement = Arrangement.spacedBy(dimension.componentSpacingSmall),
+                contentPadding = PaddingValues(vertical = dimension.paddingTiny)
             ) {
                 items(bookshelves) { chip ->
                     CategoryChip(
@@ -191,7 +201,37 @@ private fun HomeView(
 
             HorizontalDivider(color = colorScheme.outline)
             if (books.isEmpty()) {
-                Text("No books yet. Click '+' to add one!")
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_empty_book_results),
+                        contentDescription = null,
+                        tint = colorScheme.outlineVariant,
+                        modifier = Modifier.size(108.dp),
+                    )
+
+                    VerticalSpacer(dimension.componentSpacingLarge)
+
+                    Text(
+                        text = stringResource(R.string.empty_title_no_books),
+                        style = typography.headlineSmall,
+                        color = colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = dimension.screenPaddingHorizontal)
+                    )
+
+                    VerticalSpacer(dimension.componentSpacingMedium)
+
+                    Text(
+                        text = stringResource(R.string.empty_library_text),
+                        style = CustomTypography.description,
+                        textAlign = TextAlign.Center,
+                        color = colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = dimension.screenPaddingHorizontal)
+                    )
+                }
             } else {
                 BooksGrid(books)
             }
@@ -207,14 +247,14 @@ fun BooksGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
-            horizontal = dimension.spaceBase,
-            vertical = dimension.spaceSmall
+            horizontal = dimension.screenPaddingHorizontal,
+            vertical = dimension.screenPaddingVertical
         ),
-        verticalArrangement = Arrangement.spacedBy(dimension.spaceBase),
-        horizontalArrangement = Arrangement.spacedBy(dimension.spaceBase),
+        verticalArrangement = Arrangement.spacedBy(dimension.componentSpacingLarge),
+        horizontalArrangement = Arrangement.spacedBy(dimension.componentSpacingLarge),
     ) {
 
-        items(books, key = { it.title + it.author }) { book ->
+        items(books, key = { it.title + it.getAuthorsString() }) { book ->
             BookCardItemView(book = book)
         }
     }
@@ -228,8 +268,8 @@ private fun HomeTopBar(bookCount: Int) {
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(horizontal = dimension.spaceBase)
-            .padding(top = dimension.spaceBase, bottom = dimension.spaceSmall),
+            .padding(horizontal = dimension.screenPaddingHorizontal)
+            .padding(top = dimension.screenPaddingVertical, bottom = dimension.paddingSmall),
     ) {
 
         Text(
@@ -238,27 +278,27 @@ private fun HomeTopBar(bookCount: Int) {
             color = colorScheme.onBackground
         )
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(dimension.componentSpacingSmall))
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(dimension.componentSpacingMedium)
         ) {
 
             Icon(
                 painter = painterResource(R.drawable.ic_book),
                 contentDescription = null,
-                tint = colorScheme.onSurfaceVariant
+                tint = colorScheme.outline
             )
 
             Text(
-                text = "$bookCount books in your collection",
+                text = stringResource(R.string.home_page_books_in_your_collection, bookCount),
                 style = typography.bodyMedium,
-                color = colorScheme.onSurfaceVariant
+                color = colorScheme.outline
             )
         }
 
-        Spacer(Modifier.height(dimension.spaceSmall))
+        Spacer(Modifier.height(dimension.componentSpacingSmall))
 
 
         ErastosSearchField(
@@ -268,7 +308,7 @@ private fun HomeTopBar(bookCount: Int) {
             onTextChanged = {}
         )
 
-        Spacer(Modifier.height(dimension.spaceSmall))
+        Spacer(Modifier.height(dimension.componentSpacingSmall))
     }
 }
 
@@ -276,32 +316,52 @@ private fun HomeTopBar(bookCount: Int) {
 private fun previewBooks(): List<Book> = listOf(
     Book(
         title = "The Great Gatsby",
-        author = "F. Scott Fitzgerald",
+        authors = listOf("F. Scott Fitzgerald"),
         coverUrl = "http://books.google.com/books/content?id=WB5_8THW0dEC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
-        bookshelfId = 1
+        bookshelfId = 1,
+        isbn = "9780743273565",
+        description = "The Great Gatsby is a 1925 novel written by American author F. Scott Fitzgerald that follows a cast of characters living in the fictional towns of West",
+        pageCount = 180,
+        publishedDate = "1925",
+        publisher = "Scribner"
     ),
     Book(
         title = "Sapiens",
-        author = "Yuval Noah Harari",
+        authors = listOf("Yuval Noah Harari"),
         coverUrl = "http://books.google.com/books/content?id=QoeDDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
-        bookshelfId = 3
+        bookshelfId = 3,
+        isbn = "9780062316097",
+        description = "Sapiens: A Brief History of Humankind is a 201",
+        pageCount = 443,
+        publishedDate = "2011",
+        publisher = "Dutton Books"
     ),
     Book(
         title = "Atomic Habits",
-        author = "James Clear",
+        authors = listOf("James Clear"),
         coverUrl = "http://books.google.com/books/content?id=o7kYEQAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
-        bookshelfId = 5
+        bookshelfId = 5,
+        isbn = "9780735211359",
+        description = "Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones is a 2018",
+        pageCount = 319,
+        publishedDate = "2018",
+        publisher = "Avery"
     ),
     Book(
         title = "Steve Jobs",
-        author = "Walter Isaacson",
+        authors = listOf("Walter Isaacson"),
         coverUrl = "http://books.google.com/books/content?id=tzWkDQAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
-        bookshelfId = 2
+        bookshelfId = 2,
+        isbn = "9780062316097",
+        description = "Steve Jobs: The Exclusive Biography of Steve Jobs is a 2019",
+        pageCount = 504,
+        publishedDate = "2019",
+        publisher = "Dutton Books"
     ),
 )
 
 
-@Preview(showBackground = true)
+@DevicePreviews
 @Composable
 fun HomePreview() {
     ErastosTheme {
@@ -312,7 +372,7 @@ fun HomePreview() {
             ),
             onBookshelfSelected = {},
             selectedBookshelf = Bookshelf(name = "All"),
-            books = previewBooks(),
+            books = emptyList(),
             onAddBookClick = {}
         )
     }

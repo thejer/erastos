@@ -26,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import com.karetlabs.erastos.addbook.presentation.AddBookDestination
 import com.karetlabs.erastos.bookshelf.presentation.BookshelfDetailViewModel
 import com.karetlabs.erastos.data.model.Book
+import com.karetlabs.erastos.library.getAuthorsString
 import com.karetlabs.erastos.library.presentation.doOnScreenCreate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,7 +88,7 @@ fun BookCard(book: Book) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = book.title, style = MaterialTheme.typography.titleMedium)
-            Text(text = "by ${book.author}", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "by ${book.getAuthorsString()}", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

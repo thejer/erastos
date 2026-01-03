@@ -39,8 +39,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.karetlabs.erastos.R
 import com.karetlabs.erastos.addbook.presentation.AddBookViewModel
-import com.karetlabs.erastos.addbook.presentation.SearchType
-import com.karetlabs.erastos.library.ui.components.BarcodeScanner
+import com.karetlabs.erastos.home.presentation.SearchType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,18 +76,7 @@ fun AddBookScreen(
         }
     ) { paddingValues ->
         if (showScanner) {
-            BarcodeScanner(
-                onBarcodeScanned = { isbn ->
-                    searchQuery = isbn
-                    selectedSearchType = SearchType.ISBN
-                    addBookViewModel.searchBooks(SearchType.ISBN, isbn)
-                    showScanner = false
-                },
-                onError = {
-                    showScanner = false
-                    // Optionally show a toast message or other error handling
-                }
-            )
+
         } else {
             Column(
                 modifier = Modifier
@@ -127,7 +115,6 @@ fun AddBookScreen(
                     onValueChange = {
                         searchQuery = it
                         if (searchQuery.isNotBlank()) {
-                            addBookViewModel.searchBooks(selectedSearchType, searchQuery)
                         }
                     },
                     label = { Text("Search by ${selectedSearchType.name}") },
@@ -180,7 +167,6 @@ fun AddBookScreen(
                 Button(
                     onClick = {
                         if (title.isNotBlank() && author.isNotBlank()) {
-                            addBookViewModel.addBook(title, author, bookshelfId)
                             navController.popBackStack()
                         }
                     },

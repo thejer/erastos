@@ -29,10 +29,11 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.karetlabs.erastos.library.ui.DevicePreviews
+import com.karetlabs.erastos.library.ui.theme.ComponentDimensions
 import com.karetlabs.erastos.library.ui.theme.ErastosTheme
+import com.karetlabs.erastos.library.ui.theme.dimension
 import com.karetlabs.erastos.library.ui.theme.typography
 
 
@@ -70,15 +71,15 @@ fun ErastosTextField(
     singleLine: Boolean = true,
     enabled: Boolean = true,
     fieldLength: ITextFieldLength,
-    shape: Shape = RoundedCornerShape(4.dp),
+    shape: Shape = RoundedCornerShape(dimension.radiusMedium),
     placeholder: @Composable (() -> Unit)? = null,
-    style: TextStyle = typography.bodyMedium,
+    style: TextStyle = typography.bodyLarge,
     leadingIcon: (@Composable () -> Unit)? = null,
     onKeyboardAction: KeyboardActionHandler? = null,
     outputTransformation: OutputTransformation? = null,
     shouldRequestFocus: Boolean = false,
-    height: Dp = 56.dp,
-    contentPadding: PaddingValues = PaddingValues(start = 12.dp),
+    height: Dp = ComponentDimensions.textFieldHeight,
+    contentPadding: PaddingValues = PaddingValues(start = dimension.paddingMedium),
 ) {
     val fontSize = with(LocalDensity.current) {
         val fontScale = this.fontScale
@@ -136,10 +137,10 @@ private fun ErastosTextFieldPreview() {
     ErastosTheme {
         ErastosTextField(
             state = state,
-            fieldLength = TextFieldLength.DEFAULT,   // replace with your real impl
+            fieldLength = TextFieldLength.DEFAULT,
             colors = TextFieldDefaults.colors(),
-            placeholder = { Text("Search…") },
-            height = 44.dp
+            placeholder = { Text(text = "Search…", style = typography.bodyMedium) },
+            height = ComponentDimensions.searchBarHeightCompact
         )
     }
 }
