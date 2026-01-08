@@ -1,4 +1,4 @@
-package com.karetlabs.erastos.data.db
+package com.karetlabs.erastos.data.db.daos
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -15,7 +15,7 @@ interface BookDao {
     @Query("SELECT * FROM books WHERE bookshelfId = :bookshelfId ORDER BY title ASC")
     fun getBooksByBookshelf(bookshelfId: Int): Flow<List<Book>>
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.Companion.IGNORE)
     suspend fun insert(book: Book)
 
     @Query("SELECT * FROM books WHERE id = :id")

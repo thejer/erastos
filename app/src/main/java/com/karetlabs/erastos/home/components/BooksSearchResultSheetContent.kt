@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -44,6 +43,7 @@ import com.karetlabs.erastos.home.presentation.SearchType
 import com.karetlabs.erastos.library.getAuthorsString
 import com.karetlabs.erastos.library.ui.DevicePreviews
 import com.karetlabs.erastos.library.ui.components.AbsoluteVerticalSpacer
+import com.karetlabs.erastos.library.ui.components.ErastosButton
 import com.karetlabs.erastos.library.ui.components.HorizontalSpacer
 import com.karetlabs.erastos.library.ui.components.VerticalSpacer
 import com.karetlabs.erastos.library.ui.theme.ComponentDimensions
@@ -142,11 +142,20 @@ private fun SearchResultsView(
                     }
                 )
             }
-        }
-        VerticalSpacer(dimension.componentSpacingLarge)
-        selectedBook?.let { book ->
-            Button(onClick = { onContinueClicked(book) }) {
-                Text("Continue")
+
+            item {
+                VerticalSpacer(dimension.componentSpacingSmall)
+            }
+
+            selectedBook?.let { book ->
+                item {
+                    ErastosButton(
+                        onClick = { onContinueClicked(book) },
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        text = stringResource(R.string.new_book_search_result_continue),
+                    )
+                }
             }
         }
     }
@@ -292,7 +301,9 @@ private fun BookSearchResultItemPreview() {
         description = "The Great Gatsby is a 1925 novel written by American author F. Scott Fitzgerald that follows a cast of characters living in the fictional towns of West",
         pageCount = 180,
         publishedDate = "1925",
-        publisher = "Scribner"
+        publisher = "Scribner",
+        volumeId = "",
+        addMode = "SCAN"
     )
     ErastosTheme {
         BookSearchResultItem(book)
@@ -311,7 +322,9 @@ private fun previewBooks(): List<Book> = listOf(
         description = "The Great Gatsby is a 1925 novel written by American author F. Scott Fitzgerald that follows a cast of characters living in the fictional towns of West",
         pageCount = 180,
         publishedDate = "1925",
-        publisher = "Scribner"
+        publisher = "Scribner",
+        volumeId = "",
+        addMode = "SCAN"
     ),
     Book(
         title = "Sapiens",
@@ -322,7 +335,9 @@ private fun previewBooks(): List<Book> = listOf(
         description = "Sapiens: A Brief History of Humankind is a 201",
         pageCount = 443,
         publishedDate = "2011",
-        publisher = "Dutton Books"
+        publisher = "Dutton Books",
+        volumeId = "",
+        addMode = "SCAN"
     ),
     Book(
         title = "Atomic Habits",
@@ -333,7 +348,9 @@ private fun previewBooks(): List<Book> = listOf(
         description = "Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones is a 2018",
         pageCount = 319,
         publishedDate = "2018",
-        publisher = "Avery"
+        publisher = "Avery",
+        volumeId = "",
+        addMode = "SCAN"
     ),
     Book(
         title = "Steve Jobs",
@@ -344,7 +361,9 @@ private fun previewBooks(): List<Book> = listOf(
         description = "Steve Jobs: The Exclusive Biography of Steve Jobs is a 2019",
         pageCount = 504,
         publishedDate = "2019",
-        publisher = "Dutton Books"
+        publisher = "Dutton Books",
+        volumeId = "",
+        addMode = "SCAN"
     ),
 )
 

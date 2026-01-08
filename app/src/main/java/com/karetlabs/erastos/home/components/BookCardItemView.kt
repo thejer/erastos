@@ -27,7 +27,6 @@ import com.karetlabs.erastos.library.ui.theme.dimension
 fun BookCardItemView(
     book: Book,
 ) {
-
     Card(
         shape = RoundedCornerShape(dimension.radiusLarge),
         colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
@@ -82,6 +81,8 @@ private fun PreviewBookCardItem() {
         publishedDate = "1925-04-10",
         publisher = "Scribner",
         isbn = "9780141439518",
+        volumeId = "",
+        addMode = "SCAN"
     )
     BookCardItemView(book)
 }

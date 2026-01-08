@@ -15,7 +15,7 @@
     <string name="isbn_scan_isbn_will_be_detected_automatically">ISBN will be detected automatically</string>
     <string name="add_book">Add Book</string>
     <string name="add_book_done">Done</string>
-    <string name="add_book_mode_isbn_scan">ISBN Scan</string>
+    <string name="add_book_mode_search">Search</string>
     <string name="add_book_mode_manual_entry">Manual Entry</string>
     <string name="add_book_title">Title</string>
     <string name="add_book_author">Author</string>
@@ -32,4 +32,5 @@
     <string name="new_book_search_copy_title">Title</string>
     <string name="home_page_books_in_your_collection">%1$d books in your collection</string>
     <string name="home_add_book_button">Add Book</string>
+    <string name="new_book_search_result_continue">Continue</string>
 </resources>

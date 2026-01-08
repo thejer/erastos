@@ -1,7 +1,7 @@
 package com.karetlabs.erastos.repository
 
-import com.karetlabs.erastos.data.db.BookDao
-import com.karetlabs.erastos.data.db.BookshelfDao
+import com.karetlabs.erastos.data.db.daos.BookDao
+import com.karetlabs.erastos.data.db.daos.BookshelfDao
 import com.karetlabs.erastos.data.model.Book
 import com.karetlabs.erastos.data.model.Bookshelf
 import com.karetlabs.erastos.data.source.remote.BookRemoteDataSource
