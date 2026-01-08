@@ -46,19 +46,18 @@ class LibraryHomeViewModel @Inject constructor(
             is BookClickEvent -> {}
             is BookShelfSelectEvent -> {}
             is SearchQueryChangeEvent -> {}
-            is SelectSearchBookResult -> {addBookToLibrary(event.book)}
+            is SelectSearchBookResult -> addBookToLibrary(event.book)
         }
     }
 
     private fun addBookToLibrary(book: Book) {
-        if (viewState.books.find { it.isbn == book.isbn }!= null) {
+        if (viewState.books.find { it.isbn == book.isbn } != null) {
             showHideBottomSheet(false, BottomSheetType.NONE)
             return
         }
         val category = viewState.rawNewBookSearchResults.find { volume ->
-            volume.volumeInfo.industryIdentifiers.orEmpty()
-                .find { it.type == "ISBN_13" }?.identifier.orEmpty() == book.isbn
-        }?.volumeInfo?.categories?.firstOrNull().orEmpty()
+            volume.id == book.volumeId
+        }?.volumeInfo?.categories?.firstOrNull() ?: "All"
 
         val bookshelf = Bookshelf(name = category)
         viewModelScope.launch {
@@ -109,8 +108,9 @@ class LibraryHomeViewModel @Inject constructor(
             when (val result = searchNewBookUseCase(formattedQuery)) {
                 is DataResult.Success -> {
                     updateState { current ->
+                        val addMode = if (type == SearchType.TITLE) AddMode.SEARCH else AddMode.SCAN
                         current.copy(
-                            newBookSearchResults = result.data.toBooks(),
+                            newBookSearchResults = result.data.toBooks(addMode),
                             rawNewBookSearchResults = result.data.items.orEmpty(),
                             isNewBookSearchLoading = false,
                         )

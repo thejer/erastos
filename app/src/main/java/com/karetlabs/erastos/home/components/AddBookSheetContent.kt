@@ -11,10 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Surface
@@ -29,13 +30,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.karetlabs.erastos.R
 import com.karetlabs.erastos.library.ui.DevicePreviews
+import com.karetlabs.erastos.library.ui.components.ErastosButton
 import com.karetlabs.erastos.library.ui.components.ErastosLabeledTextField
+import com.karetlabs.erastos.library.ui.components.HorizontalSpacer
 import com.karetlabs.erastos.library.ui.components.TextFieldLength
 import com.karetlabs.erastos.library.ui.theme.ComponentDimensions
 import com.karetlabs.erastos.library.ui.theme.CustomTypography
@@ -52,7 +57,7 @@ fun AddBookBottomSheetContent(
     initialMode: AddBookMode = AddBookMode.IsbnScan,
     onDoneClick: () -> Unit,
     onScanClick: () -> Unit,
-    onSearchBookClick: (isbn: String) -> Unit,
+    onSearchBookClick: (String) -> Unit,
     onAddBookClick: (
         title: String,
         author: String,
@@ -79,7 +84,6 @@ fun AddBookBottomSheetContent(
     var author by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
     var manualIsbn by remember { mutableStateOf("") }
-    var scanIsbn by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -133,12 +137,10 @@ fun AddBookBottomSheetContent(
                 }
             )
 
-            AddBookMode.IsbnScan -> IsbnScanContent(
-                isbn = scanIsbn,
-                onIsbnChange = { scanIsbn = it },
+            AddBookMode.IsbnScan -> SearchOrScanNewBookContent(
                 textFieldColors = textFieldColors,
                 onScanClick = onScanClick,
-                onSearchBookClick = { onSearchBookClick(scanIsbn) }
+                onSearchBookClick = onSearchBookClick
             )
         }
     }
@@ -162,7 +164,7 @@ private fun AddBookModeSwitcher(
                 .fillMaxWidth()
         ) {
             ModeChip(
-                text = stringResource(R.string.add_book_mode_isbn_scan),
+                text = stringResource(R.string.add_book_mode_search),
                 isSelected = selected == AddBookMode.IsbnScan,
                 onClick = { onSelect(AddBookMode.IsbnScan) },
                 modifier = Modifier.weight(1f)
@@ -198,6 +200,7 @@ private fun ModeChip(
     Surface(
         modifier = modifier
             .height(ComponentDimensions.buttonHeightText)
+            .clip(RoundedCornerShape(dimens.radiusRounded))
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(dimens.radiusRounded),
         color = bg,
@@ -278,44 +281,44 @@ private fun ManualEntryContent(
 
         Spacer(Modifier.height(dimens.paddingLarge))
 
-        Button(
+        ErastosButton(
             onClick = onAddBookClick,
             modifier = Modifier
-                .fillMaxWidth()
-                .height(ComponentDimensions.buttonHeightFilled),
-            shape = RoundedCornerShape(dimens.radiusRounded)
-        ) {
-            Text(
-                text = stringResource(R.string.add_book),
-                style = CustomTypography.buttonText
-            )
-        }
+                .fillMaxWidth(),
+            text = stringResource(R.string.add_book),
+        )
     }
 }
 
 @Composable
-private fun IsbnScanContent(
-    isbn: String,
-    onIsbnChange: (String) -> Unit,
+private fun SearchOrScanNewBookContent(
     textFieldColors: TextFieldColors,
     onScanClick: () -> Unit,
-    onSearchBookClick: () -> Unit
+    onSearchBookClick: (String) -> Unit
 ) {
     val dimens = dimension
+    var query by remember { mutableStateOf("") }
 
     Column {
-        Button(
+        ErastosButton(
             onClick = onScanClick,
             modifier = Modifier
-                .fillMaxWidth()
-                .height(ComponentDimensions.textFieldHeight),
-            shape = RoundedCornerShape(dimens.radiusRounded)
-        ) {
-            Text(
-                text = "🔍  Scan Barcode",
-                style = CustomTypography.buttonText
-            )
-        }
+                .fillMaxWidth(),
+            content = {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_barcode_scanner),
+                        contentDescription = null,
+                        Modifier.size(dimension.iconBase)
+                    )
+                    HorizontalSpacer(dimension.componentSpacingSmall)
+                    Text(
+                        text = "Scan Barcode",
+                        style = CustomTypography.buttonText
+                    )
+                }
+            }
+        )
 
         Spacer(Modifier.height(dimens.componentSpacingLarge))
 
@@ -333,27 +336,23 @@ private fun IsbnScanContent(
 
         ErastosLabeledTextField(
             label = stringResource(R.string.add_book_search_anything_title_author_isbn),
-            value = isbn,
-            onValueChange = onIsbnChange,
-            fieldLength = TextFieldLength.ISBN,
+            value = query,
+            onValueChange = { query = it },
+            fieldLength = TextFieldLength.DEFAULT,
             colors = textFieldColors,
-            keyboardType = KeyboardType.Number
+            keyboardType = KeyboardType.Text
         )
 
         Spacer(Modifier.height(dimens.paddingLarge))
 
-        Button(
-            onClick = onSearchBookClick,
+        ErastosButton(
+            onClick = {
+                onSearchBookClick(query)
+            },
             modifier = Modifier
-                .fillMaxWidth()
-                .height(ComponentDimensions.buttonHeightFilled),
-            shape = RoundedCornerShape(dimens.radiusRounded)
-        ) {
-            Text(
-                text = stringResource(R.string.add_book_search_book),
-                style = CustomTypography.buttonText
-            )
-        }
+                .fillMaxWidth(),
+            text = stringResource(R.string.add_book_search_book),
+        )
     }
 }
 

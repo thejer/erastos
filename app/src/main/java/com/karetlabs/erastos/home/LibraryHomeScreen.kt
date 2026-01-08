@@ -101,7 +101,9 @@ fun LibraryHomeScreen(
                 AddBookBottomSheetContent(
                     onDoneClick = { viewModel.onEvent(DismissBottomSheetEvent) },
                     onScanClick = { viewModel.onEvent(ScanIsbnClickEvent) },
-                    onSearchBookClick = {},
+                    onSearchBookClick = {
+                        viewModel.onEvent(StartNewBookSearchEvent(searchType = SearchType.TITLE, query = it))
+                    },
                     onAddBookClick = { _, _, _, _ -> }
                 )
             }
@@ -323,7 +325,9 @@ private fun previewBooks(): List<Book> = listOf(
         description = "The Great Gatsby is a 1925 novel written by American author F. Scott Fitzgerald that follows a cast of characters living in the fictional towns of West",
         pageCount = 180,
         publishedDate = "1925",
-        publisher = "Scribner"
+        publisher = "Scribner",
+        volumeId = "",
+        addMode = "SCAN"
     ),
     Book(
         title = "Sapiens",
@@ -334,7 +338,9 @@ private fun previewBooks(): List<Book> = listOf(
         description = "Sapiens: A Brief History of Humankind is a 201",
         pageCount = 443,
         publishedDate = "2011",
-        publisher = "Dutton Books"
+        publisher = "Dutton Books",
+        volumeId = "",
+        addMode = "SCAN"
     ),
     Book(
         title = "Atomic Habits",
@@ -345,7 +351,9 @@ private fun previewBooks(): List<Book> = listOf(
         description = "Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones is a 2018",
         pageCount = 319,
         publishedDate = "2018",
-        publisher = "Avery"
+        publisher = "Avery",
+        volumeId = "",
+        addMode = "SCAN"
     ),
     Book(
         title = "Steve Jobs",
@@ -356,7 +364,9 @@ private fun previewBooks(): List<Book> = listOf(
         description = "Steve Jobs: The Exclusive Biography of Steve Jobs is a 2019",
         pageCount = 504,
         publishedDate = "2019",
-        publisher = "Dutton Books"
+        publisher = "Dutton Books",
+        volumeId = "",
+        addMode = "SCAN"
     ),
 )
 

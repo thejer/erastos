@@ -21,7 +21,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -37,11 +37,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.core.content.ContextCompat
 import com.karetlabs.erastos.R
+import com.karetlabs.erastos.library.ui.components.ErastosButton
 import com.karetlabs.erastos.library.ui.theme.Border
 import com.karetlabs.erastos.library.ui.theme.ComponentDimensions
 import com.karetlabs.erastos.library.ui.theme.dimension
@@ -154,9 +156,12 @@ private fun NoCameraPermissionView(
 
             Spacer(Modifier.height(dimension.componentSpacingLarge))
 
-            Button(onClick = { requestPermission.launch(Manifest.permission.CAMERA) }) {
-                Text(stringResource(R.string.isbn_scan_allow_camera))
-            }
+            ErastosButton(
+                onClick = { requestPermission.launch(Manifest.permission.CAMERA) },
+                modifier = Modifier
+                    .fillMaxWidth(),
+                text = stringResource(R.string.isbn_scan_allow_camera),
+            )
 
             Spacer(Modifier.height(dimension.componentSpacingSmall))
 
@@ -187,9 +192,11 @@ private fun InstructionCard(
             ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "▮▮▮",
-                style = bodyStyle.copy(color = MaterialTheme.colorScheme.primary)
+            Icon(
+                painter = painterResource(R.drawable.ic_barcode_scanner),
+                contentDescription = null,
+                modifier = Modifier.size(dimens.iconLarge),
+                tint = MaterialTheme.colorScheme.primary
             )
 
             Spacer(Modifier.height(dimens.componentSpacingSmall))

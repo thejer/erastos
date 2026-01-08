@@ -46,7 +46,7 @@ fun ErastosLabeledTextField(
     enabled: Boolean = true,
     singleLine: Boolean = true,
     height: Dp = 56.dp,
-    shape: Shape = RoundedCornerShape(dimension.radiusRounded),
+    shape: Shape = RoundedCornerShape(dimension.radiusBase),
     contentPadding: PaddingValues = PaddingValues(horizontal = dimension.paddingMedium),
     labelStyle: TextStyle = CustomTypography.fieldLabel,
     textStyle: TextStyle = typography.bodyMedium,

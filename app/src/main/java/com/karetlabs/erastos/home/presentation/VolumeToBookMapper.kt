@@ -4,7 +4,7 @@ import com.karetlabs.erastos.data.model.Book
 import com.karetlabs.erastos.network.data.Volume
 import com.karetlabs.erastos.network.data.VolumesResponse
 
-fun Volume.toBook(): Book {
+fun Volume.toBook(addMode: AddMode): Book {
     val info = volumeInfo
 
     return Book(
@@ -18,12 +18,27 @@ fun Volume.toBook(): Book {
         publishedDate = info.publishedDate.orEmpty(),
         publisher = info.publisher.orEmpty(),
         isbn = info.industryIdentifiers.orEmpty().find { it.type == "ISBN_13" }?.identifier.orEmpty(),
-        bookshelfId = 0
+        bookshelfId = 0,
+        volumeId = id,
+        addMode = addMode.mode
     )
 }
 
-fun VolumesResponse.toBooks(): List<Book> {
+fun VolumesResponse.toBooks(addMode: AddMode): List<Book> {
     return items
         .orEmpty()
-        .map { it.toBook() }
+        .map { it.toBook(addMode) }
+}
+
+enum class AddMode(val mode: String) {
+    MANUAL("MANUAL"),
+    SCAN("SCAN"),
+    SEARCH("SEARCH");
+
+    companion object {
+        fun from(value: String?): AddMode {
+            val normalized = value?.trim()?.uppercase().orEmpty()
+            return entries.firstOrNull { it.mode == normalized } ?: MANUAL
+        }
+    }
 }

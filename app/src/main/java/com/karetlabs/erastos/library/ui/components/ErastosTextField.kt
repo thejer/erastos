@@ -51,7 +51,6 @@ enum class TextFieldLength(override val max: Int) : ITextFieldLength {
     ISBN(12);
 
     companion object {
-
         fun custom(length: Int): ITextFieldLength = CustomTextFieldLength(length)
     }
 }
