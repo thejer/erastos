@@ -9,17 +9,17 @@ data class Book(
     val id: Int = 0,
     val title: String,
     val authors: List<String>,
-    val coverUrl: String,
-    val description: String,
-    val pageCount: Int,
-    val publishedDate: String,
-    val publisher: String,
-    val isbn: String,
+    val coverUrl: String?,
+    val description: String?,
+    val pageCount: Int?,
+    val publishedDate: String?,
+    val publisher: String?,
+    val isbn: String?,
     /**
      * How this book was added to the library.
      * Expected values: "MANUAL", "SCAN", "SEARCH".
      */
     val addMode: String,
-    val volumeId: String,
+    val volumeId: String?,
     val bookshelfId: Int // Foreign key to Bookshelf
 )

@@ -17,6 +17,7 @@ sealed class LibraryHomeScreenEvent: BaseEvent {
     data class StartNewBookSearchEvent(val searchType: SearchType, val query: String): LibraryHomeScreenEvent()
     data class BookClickEvent(val book: Book): LibraryHomeScreenEvent()
     data class SelectSearchBookResult(val book: Book): LibraryHomeScreenEvent()
+    data class AddBookManually(val book: Book, val bookshelfName: String): LibraryHomeScreenEvent()
 }
 
 sealed class LibraryHomeScreenIntent: BaseIntent {

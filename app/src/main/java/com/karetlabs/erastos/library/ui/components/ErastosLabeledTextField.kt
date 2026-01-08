@@ -11,7 +11,7 @@ import androidx.compose.foundation.text.input.KeyboardActionHandler
 import androidx.compose.foundation.text.input.OutputTransformation
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
@@ -72,7 +72,8 @@ fun ErastosLabeledTextField(
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = label,
-            style = labelStyle.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+            style = labelStyle,
+            color = colorScheme.onSurfaceVariant
         )
 
         Spacer(Modifier.height(dimens.componentSpacingSmall))
@@ -89,7 +90,8 @@ fun ErastosLabeledTextField(
                 placeholder?.let {
                     Text(
                         text = it,
-                        style = textStyle.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        style = textStyle,
+                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.32f)
                     )
                 }
             },

@@ -18,7 +18,7 @@
     <string name="add_book_mode_search">Search</string>
     <string name="add_book_mode_manual_entry">Manual Entry</string>
     <string name="add_book_title">Title</string>
-    <string name="add_book_author">Author</string>
+    <string name="add_book_authors">Authors</string>
     <string name="add_book_category">Category</string>
     <string name="add_book_isbn_optional">ISBN (Optional)</string>
     <string name="add_book_enter_isbn_if_available">Enter ISBN if available</string>
@@ -33,4 +33,7 @@
     <string name="home_page_books_in_your_collection">%1$d books in your collection</string>
     <string name="home_add_book_button">Add Book</string>
     <string name="new_book_search_result_continue">Continue</string>
+    <string name="add_book_bookshelf">Bookshelf</string>
+    <string name="add_book_authors_label">Add authors separated by commas</string>
+    <string name="add_book_title_label">e.g., Atomic Habits</string>
 </resources>

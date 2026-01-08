@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,7 +14,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -37,7 +42,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.karetlabs.erastos.R
+import com.karetlabs.erastos.data.model.Book
+import com.karetlabs.erastos.data.model.Bookshelf
+import com.karetlabs.erastos.home.presentation.AddMode
+import com.karetlabs.erastos.library.getAuthorsString
 import com.karetlabs.erastos.library.ui.DevicePreviews
+import com.karetlabs.erastos.library.ui.components.CategoryChip
 import com.karetlabs.erastos.library.ui.components.ErastosButton
 import com.karetlabs.erastos.library.ui.components.ErastosLabeledTextField
 import com.karetlabs.erastos.library.ui.components.HorizontalSpacer
@@ -54,16 +64,14 @@ enum class AddBookMode {
 @Composable
 fun AddBookBottomSheetContent(
     modifier: Modifier = Modifier,
-    initialMode: AddBookMode = AddBookMode.IsbnScan,
+    initialMode: AddBookMode = AddBookMode.ManualEntry,
+    bookshelves: List<Bookshelf> = emptyList(),
     onDoneClick: () -> Unit,
     onScanClick: () -> Unit,
     onSearchBookClick: (String) -> Unit,
-    onAddBookClick: (
-        title: String,
-        author: String,
-        category: String,
-        isbn: String?
-    ) -> Unit,
+    book: Book? = null,
+    currentBookshelf: Bookshelf? = null,
+    onAddBookClick: (book: Book, bookShelfName: String) -> Unit
 ) {
     val dimens = dimension
     val typo = typography
@@ -80,10 +88,15 @@ fun AddBookBottomSheetContent(
 
     var mode by remember { mutableStateOf(initialMode) }
 
-    var title by remember { mutableStateOf("") }
-    var author by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf("") }
-    var manualIsbn by remember { mutableStateOf("") }
+    var title by remember { mutableStateOf(book?.title.orEmpty()) }
+    var author by remember { mutableStateOf(book?.getAuthorsString().orEmpty()) }
+    var category by remember { mutableStateOf(currentBookshelf?.name.orEmpty()) }
+    var manualIsbn by remember { mutableStateOf(book?.isbn.orEmpty()) }
+    var coverUrl by remember { mutableStateOf(book?.coverUrl.orEmpty()) }
+    var description by remember { mutableStateOf(book?.description.orEmpty()) }
+    var pageCount by remember { mutableStateOf(book?.pageCount?.toString().orEmpty()) }
+    var publishedDate by remember { mutableStateOf(book?.publishedDate.orEmpty()) }
+    var publisher by remember { mutableStateOf(book?.publisher.orEmpty()) }
 
     Column(
         modifier = modifier
@@ -119,20 +132,48 @@ fun AddBookBottomSheetContent(
         when (mode) {
             AddBookMode.ManualEntry -> ManualEntryContent(
                 title = title,
-                onTitleChange = { title = it },
                 author = author,
-                onAuthorChange = { author = it },
                 category = category,
-                onCategoryChange = { category = it },
                 isbn = manualIsbn,
-                onIsbnChange = { manualIsbn = it },
+                coverUrl = coverUrl,
+                description = description,
+                pageCount = pageCount,
+                publishedDate = publishedDate,
+                publisher = publisher,
                 textFieldColors = textFieldColors,
+                bookshelves = bookshelves,
+                onFieldChange = { field, value ->
+                    when (field) {
+                        FieldType.Title -> title = value
+                        FieldType.Author -> author = value
+                        FieldType.Category -> category = value
+                        FieldType.ISBN -> manualIsbn = value
+                        FieldType.CoverUrl -> coverUrl = value
+                        FieldType.Description -> description = value
+                        FieldType.PageCount -> pageCount = value
+                        FieldType.PublishedDate -> publishedDate = value
+                        FieldType.Publisher -> publisher = value
+                    }
+                },
                 onAddBookClick = {
                     onAddBookClick(
-                        title,
-                        author,
-                        category,
-                        manualIsbn.ifBlank { null }
+                        Book(
+                            title = title,
+                            authors = author
+                                .split(",")
+                                .map { it.trim() }
+                                .filter { it.isNotEmpty() },
+                            isbn = manualIsbn.ifBlank { null },
+                            coverUrl = coverUrl.ifBlank { null },
+                            description = description.ifBlank { null },
+                            pageCount = pageCount.toIntOrNull(),
+                            publishedDate = publishedDate.ifBlank { null },
+                            publisher = publisher.ifBlank { null },
+                            addMode = AddMode.MANUAL.mode,
+                            volumeId = "",
+                            bookshelfId = bookshelves.find { it.name == category }?.id ?: 0
+                        ),
+                        category
                     )
                 }
             )
@@ -194,7 +235,10 @@ private fun ModeChip(
         else colorScheme.surfaceVariant
 
     val border =
-        if (isSelected) BorderStroke(dimens.dividerThickness, colorScheme.outline.copy(alpha = 0.3f))
+        if (isSelected) BorderStroke(
+            dimens.dividerThickness,
+            colorScheme.outline.copy(alpha = 0.3f)
+        )
         else null
 
     Surface(
@@ -220,26 +264,41 @@ private fun ModeChip(
     }
 }
 
+enum class FieldType {
+    Title, Author, Category, ISBN, CoverUrl, Description, PageCount, PublishedDate, Publisher
+}
+
 @Composable
 private fun ManualEntryContent(
     title: String,
-    onTitleChange: (String) -> Unit,
     author: String,
-    onAuthorChange: (String) -> Unit,
     category: String,
-    onCategoryChange: (String) -> Unit,
     isbn: String,
-    onIsbnChange: (String) -> Unit,
+    coverUrl: String,
+    description: String,
+    pageCount: String,
+    publishedDate: String,
+    onFieldChange: (FieldType, String) -> Unit,
+    publisher: String,
     textFieldColors: TextFieldColors,
-    onAddBookClick: () -> Unit
+    onAddBookClick: () -> Unit,
+    bookshelves: List<Bookshelf> = emptyList(),
+    selectedBookshelf: Bookshelf? = null
 ) {
     val dimens = dimension
 
-    Column {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
         ErastosLabeledTextField(
             label = stringResource(R.string.add_book_title),
+            placeholder = stringResource(R.string.add_book_title_label),
             value = title,
-            onValueChange = onTitleChange,
+            onValueChange = {
+                onFieldChange(FieldType.Title, it)
+            },
             fieldLength = TextFieldLength.NAME,
             colors = textFieldColors,
             keyboardCapitalization = KeyboardCapitalization.Words
@@ -248,9 +307,12 @@ private fun ManualEntryContent(
         Spacer(Modifier.height(dimens.componentSpacingMedium))
 
         ErastosLabeledTextField(
-            label = stringResource(R.string.add_book_author),
+            label = stringResource(R.string.add_book_authors),
+            placeholder = stringResource(R.string.add_book_authors_label),
             value = author,
-            onValueChange = onAuthorChange,
+            onValueChange = {
+                onFieldChange(FieldType.Author, it)
+            },
             fieldLength = TextFieldLength.NAME,
             colors = textFieldColors,
             keyboardCapitalization = KeyboardCapitalization.Words
@@ -259,24 +321,113 @@ private fun ManualEntryContent(
         Spacer(Modifier.height(dimens.componentSpacingMedium))
 
         ErastosLabeledTextField(
-            label = stringResource(R.string.add_book_category),
+            label = stringResource(R.string.add_book_bookshelf),
             value = category,
-            onValueChange = onCategoryChange,
+            onValueChange = {
+                onFieldChange(FieldType.Category, it)
+            },
             fieldLength = TextFieldLength.NAME,
             colors = textFieldColors,
             keyboardCapitalization = KeyboardCapitalization.Words
         )
+
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(dimension.componentSpacingSmall),
+            contentPadding = PaddingValues(vertical = dimension.paddingTiny)
+        ) {
+            items(bookshelves) { bookshelf ->
+                CategoryChip(
+                    text = bookshelf.name,
+                    selected = bookshelf == selectedBookshelf,
+                    textStyle = CustomTypography.fieldLabel,
+                    height = ComponentDimensions.fieldChipHeight,
+                    onClick = { onFieldChange(FieldType.Category, bookshelf.name) }
+                )
+            }
+        }
 
         Spacer(Modifier.height(dimens.componentSpacingMedium))
 
         ErastosLabeledTextField(
             label = stringResource(R.string.add_book_isbn_optional),
             value = isbn,
-            onValueChange = onIsbnChange,
+            onValueChange = {
+                onFieldChange(FieldType.ISBN, it)
+            },
             fieldLength = TextFieldLength.ISBN,
             colors = textFieldColors,
             keyboardType = KeyboardType.Number,
             placeholder = stringResource(R.string.add_book_enter_isbn_if_available)
+        )
+
+        Spacer(Modifier.height(dimens.componentSpacingMedium))
+        Text(
+            text = "Book Cover",
+            style = CustomTypography.fieldLabel,
+            color = colorScheme.onSurfaceVariant
+        )
+
+        Spacer(Modifier.height(dimens.componentSpacingSmall))
+
+        BookCoverUploadCard(
+            coverUrl = coverUrl,
+            onCoverUrlChange = {
+                onFieldChange(FieldType.CoverUrl, it)
+            }
+        )
+
+        Spacer(Modifier.height(dimens.componentSpacingMedium))
+
+
+        ErastosLabeledTextField(
+            label = "Description",
+            value = description,
+            onValueChange = {
+                onFieldChange(FieldType.Description, it)
+            },
+            fieldLength = TextFieldLength.LONG_TEXT,
+            colors = textFieldColors,
+            keyboardCapitalization = KeyboardCapitalization.Sentences
+        )
+
+        Spacer(Modifier.height(dimens.componentSpacingMedium))
+
+        ErastosLabeledTextField(
+            label = "Page Count",
+            value = pageCount,
+            onValueChange = {
+                onFieldChange(FieldType.PageCount, it)
+            },
+            fieldLength = TextFieldLength.DEFAULT,
+            colors = textFieldColors,
+            keyboardType = KeyboardType.Number
+        )
+
+        Spacer(Modifier.height(dimens.componentSpacingMedium))
+
+        ErastosLabeledTextField(
+            label = "Published Date",
+            value = publishedDate,
+            onValueChange = {
+                onFieldChange(FieldType.PublishedDate, it)
+            },
+            fieldLength = TextFieldLength.DEFAULT,
+            colors = textFieldColors
+        )
+
+        Spacer(Modifier.height(dimens.componentSpacingMedium))
+
+        ErastosLabeledTextField(
+            label = "Publisher",
+            value = publisher,
+            onValueChange = {
+                onFieldChange(FieldType.Publisher, it)
+            },
+            fieldLength = TextFieldLength.NAME,
+            colors = textFieldColors,
+            keyboardCapitalization = KeyboardCapitalization.Words
         )
 
         Spacer(Modifier.height(dimens.paddingLarge))
@@ -305,7 +456,10 @@ private fun SearchOrScanNewBookContent(
             modifier = Modifier
                 .fillMaxWidth(),
             content = {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_barcode_scanner),
                         contentDescription = null,
@@ -362,10 +516,19 @@ private fun AddBookBottomSheetContentPreview() {
     MaterialTheme {
         Surface {
             AddBookBottomSheetContent(
+                initialMode = AddBookMode.ManualEntry,
+                bookshelves = listOf(
+                    Bookshelf(name = "All"),
+                    Bookshelf(name = "Fiction"),
+                    Bookshelf(name = "Romance"),
+                    Bookshelf(name = "Fantasy"),
+                    Bookshelf(name = "Biography"),
+                    Bookshelf(name = "History"),
+                ),
                 onDoneClick = {},
                 onScanClick = {},
                 onSearchBookClick = {},
-                onAddBookClick = { _, _, _, _ -> }
+                onAddBookClick = { _, _-> }
             )
         }
     }

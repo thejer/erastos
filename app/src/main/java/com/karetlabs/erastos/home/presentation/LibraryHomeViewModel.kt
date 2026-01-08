@@ -7,6 +7,7 @@ import com.karetlabs.erastos.data.model.Bookshelf
 import com.karetlabs.erastos.home.presentation.BottomSheetType.ERROR
 import com.karetlabs.erastos.home.presentation.BottomSheetType.NEW_BOOK_SEARCH
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.AddBookClickEvent
+import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.AddBookManually
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.BookClickEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.BookShelfSelectEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.DismissBottomSheetEvent
@@ -47,6 +48,17 @@ class LibraryHomeViewModel @Inject constructor(
             is BookShelfSelectEvent -> {}
             is SearchQueryChangeEvent -> {}
             is SelectSearchBookResult -> addBookToLibrary(event.book)
+            is AddBookManually -> manuallyAddBook(event.book, event.bookshelfName)
+        }
+    }
+
+    private fun manuallyAddBook(book: Book, bookshelfName: String) {
+        val bookshelf = Bookshelf(name = bookshelfName)
+        viewModelScope.launch {
+            val existingBookshelf = viewState.bookshelves.find { it.name == bookshelf.name }
+            val newBookshelfId = existingBookshelf?.id ?: addBookshelfUseCase(bookshelf).toInt()
+            addBookUseCase(book.copy(bookshelfId = newBookshelfId))
+            showHideBottomSheet(false, BottomSheetType.NONE)
         }
     }
 
@@ -58,14 +70,7 @@ class LibraryHomeViewModel @Inject constructor(
         val category = viewState.rawNewBookSearchResults.find { volume ->
             volume.id == book.volumeId
         }?.volumeInfo?.categories?.firstOrNull() ?: "All"
-
-        val bookshelf = Bookshelf(name = category)
-        viewModelScope.launch {
-            val existingBookshelf = viewState.bookshelves.find { it.name == bookshelf.name }
-            val newBookshelfId = existingBookshelf?.id ?: addBookshelfUseCase(bookshelf).toInt()
-            addBookUseCase(book.copy(bookshelfId = newBookshelfId))
-            showHideBottomSheet(false, BottomSheetType.NONE)
-        }
+        manuallyAddBook(book, category)
     }
 
     private fun showHideBottomSheet(shouldShow: Boolean, sheetType: BottomSheetType) {

@@ -104,7 +104,9 @@ fun LibraryHomeScreen(
                     onSearchBookClick = {
                         viewModel.onEvent(StartNewBookSearchEvent(searchType = SearchType.TITLE, query = it))
                     },
-                    onAddBookClick = { _, _, _, _ -> }
+                    onAddBookClick = { book, bookshelf ->
+                        viewModel.onEvent(SelectSearchBookResult(book))
+                    }
                 )
             }
 
@@ -144,7 +146,7 @@ private fun HomeView(
 
     Scaffold(
         topBar = {
-            HomeTopBar(20)
+            HomeTopBar(books.size)
         },
         floatingActionButton = {
             FloatingActionButton(
