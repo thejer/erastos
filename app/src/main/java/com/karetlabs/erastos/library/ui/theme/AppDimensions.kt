@@ -108,6 +108,7 @@ object ComponentDimensions {
 
     // Book Cover
     val bookCoverWidthSmall = 96.dp
+    val bookCoverWidthXSmall = 56.dp
     val bookCoverHeightSmall = 144.dp
     val bookCoverWidthMedium = 128.dp
     val bookCoverHeightMedium = 192.dp
@@ -131,6 +132,7 @@ object ComponentDimensions {
 
     // Chips
     val chipHeight = 32.dp
+    val fieldChipHeight = 24.dp
     val chipPaddingHorizontal = 16.dp
     val chipIconSize = 18.dp
 

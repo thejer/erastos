@@ -63,6 +63,14 @@ fun ErastosSearchField(
             focusedContainerColor = colorScheme.surfaceVariant,
             unfocusedContainerColor = colorScheme.surfaceVariant,
             disabledContainerColor = colorScheme.surfaceVariant,
+            focusedPlaceholderColor = colorScheme.onSurfaceVariant.copy(alpha = 0.32f),
+            unfocusedPlaceholderColor = colorScheme.onSurfaceVariant.copy(alpha = 0.32f),
+            focusedLeadingIconColor = colorScheme.onSurfaceVariant,
+            unfocusedLeadingIconColor = colorScheme.onSurfaceVariant,
+            disabledLeadingIconColor = colorScheme.onSurfaceVariant,
+            focusedTextColor = colorScheme.onSurfaceVariant,
+            unfocusedTextColor = colorScheme.onSurfaceVariant,
+            disabledTextColor = colorScheme.onSurfaceVariant.copy(alpha = 0.32f),
         ),
         fieldLength = TextFieldLength.SEARCH,
         leadingIcon = {
@@ -70,14 +78,12 @@ fun ErastosSearchField(
                 painter = getPainter(R.drawable.ic_search),
                 contentDescription = stringResource(R.string.search),
                 modifier = Modifier.size(ComponentDimensions.searchBarIconSize),
-                tint = colorScheme.onSurfaceVariant
             )
         },
         placeholder = {
             Text(
                 text = placeholderText,
                 style = placeHolderStyle,
-                color = colorScheme.onSurfaceVariant
             )
         },
         keyboardOptions = KeyboardOptions(

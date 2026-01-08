@@ -43,6 +43,7 @@ sealed interface ITextFieldLength {
 
 enum class TextFieldLength(override val max: Int) : ITextFieldLength {
     DEFAULT(500),
+    LONG_TEXT(Integer.MAX_VALUE),
     NAME(50),
     PASSWORD(50),
     EMAIL(50),

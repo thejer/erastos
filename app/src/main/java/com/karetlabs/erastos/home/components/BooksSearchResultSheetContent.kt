@@ -198,14 +198,14 @@ fun BookSearchResultItem(
                 .padding(dimension.paddingSmall),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val coverUrl = book.coverUrl.trim()
+            val coverUrl = book.coverUrl.orEmpty().trim()
                 AsyncImage(
                     model = coverUrl,
                     error = painterResource(R.drawable.img_book_cover),
                     placeholder = painterResource(R.drawable.img_book_cover),
                     contentDescription = stringResource(R.string.search_result_item_book_cover),
                     modifier = Modifier
-                        .width(ComponentDimensions.avatarSizeLarge)
+                        .width(ComponentDimensions.bookCoverWidthXSmall)
                         .aspectRatio(0.63f)
                         .clip(coverShape),
                     contentScale = ContentScale.Crop
@@ -241,8 +241,8 @@ fun BookSearchResultItem(
 
                 AbsoluteVerticalSpacer(1f)
 
-                val publisher = book.publisher.trim()
-                val year = book.publishedDate.trim()
+                val publisher = book.publisher.orEmpty().trim()
+                val year = book.publishedDate.orEmpty().trim()
                 val publisherLine = listOf(publisher, year)
                     .filter { it.isNotBlank() }
                     .joinToString(", ")
@@ -259,7 +259,7 @@ fun BookSearchResultItem(
 
                 VerticalSpacer(dimension.paddingTiny)
 
-                if (book.isbn.isNotBlank()) {
+                if (!book.isbn.isNullOrBlank()) {
                     Text(
                         text = book.isbn,
                         style = CustomTypography.metadata,
