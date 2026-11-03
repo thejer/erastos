@@ -20,6 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -45,7 +46,8 @@ import com.karetlabs.erastos.R
 import com.karetlabs.erastos.data.model.Book
 import com.karetlabs.erastos.data.model.Bookshelf
 import com.karetlabs.erastos.home.presentation.AddMode
-import com.karetlabs.erastos.library.getAuthorsString
+import com.karetlabs.erastos.home.presentation.ManualBookField
+import com.karetlabs.erastos.home.presentation.ManualBookFormState
 import com.karetlabs.erastos.library.ui.DevicePreviews
 import com.karetlabs.erastos.library.ui.components.CategoryChip
 import com.karetlabs.erastos.library.ui.components.ErastosButton
@@ -69,9 +71,11 @@ fun AddBookBottomSheetContent(
     onDoneClick: () -> Unit,
     onScanClick: () -> Unit,
     onSearchBookClick: (String) -> Unit,
+    form: ManualBookFormState,
+    onManualBookFieldChange: (ManualBookField, String) -> Unit,
     book: Book? = null,
-    currentBookshelf: Bookshelf? = null,
-    onAddBookClick: (book: Book, bookShelfName: String) -> Unit
+    onAddBookClick: (book: Book, bookShelfName: String) -> Unit,
+    onDeleteBookClick: (Book) -> Unit = {}
 ) {
     val dimens = dimension
     val typo = typography
@@ -86,17 +90,7 @@ fun AddBookBottomSheetContent(
         cursorColor = colorScheme.primary
     )
 
-    var mode by remember { mutableStateOf(initialMode) }
-
-    var title by remember { mutableStateOf(book?.title.orEmpty()) }
-    var author by remember { mutableStateOf(book?.getAuthorsString().orEmpty()) }
-    var category by remember { mutableStateOf(currentBookshelf?.name.orEmpty()) }
-    var manualIsbn by remember { mutableStateOf(book?.isbn.orEmpty()) }
-    var coverUrl by remember { mutableStateOf(book?.coverUrl.orEmpty()) }
-    var description by remember { mutableStateOf(book?.description.orEmpty()) }
-    var pageCount by remember { mutableStateOf(book?.pageCount?.toString().orEmpty()) }
-    var publishedDate by remember { mutableStateOf(book?.publishedDate.orEmpty()) }
-    var publisher by remember { mutableStateOf(book?.publisher.orEmpty()) }
+    var mode by remember(book, initialMode) { mutableStateOf(initialMode) }
 
     Column(
         modifier = modifier
@@ -111,7 +105,10 @@ fun AddBookBottomSheetContent(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = stringResource(R.string.add_book), style = typo.headlineSmall)
+            Text(
+                text = stringResource(if (book == null) R.string.add_book else R.string.edit_book),
+                style = typo.headlineSmall
+            )
             TextButton(onClick = onDoneClick) {
                 Text(
                     text = stringResource(R.string.add_book_done),
@@ -122,58 +119,53 @@ fun AddBookBottomSheetContent(
 
         Spacer(Modifier.height(dimens.componentSpacingLarge))
 
-        AddBookModeSwitcher(
-            selected = mode,
-            onSelect = { mode = it }
-        )
-
-        Spacer(Modifier.height(dimens.paddingLarge))
+        if (book == null) {
+            AddBookModeSwitcher(
+                selected = mode,
+                onSelect = { mode = it }
+            )
+            Spacer(Modifier.height(dimens.paddingLarge))
+        }
 
         when (mode) {
             AddBookMode.ManualEntry -> ManualEntryContent(
-                title = title,
-                author = author,
-                category = category,
-                isbn = manualIsbn,
-                coverUrl = coverUrl,
-                description = description,
-                pageCount = pageCount,
-                publishedDate = publishedDate,
-                publisher = publisher,
+                title = form.title,
+                author = form.author,
+                category = form.category,
+                isbn = form.isbn,
+                coverUrl = form.coverUrl,
+                description = form.description,
+                pageCount = form.pageCount,
+                publishedDate = form.publishedDate,
+                publisher = form.publisher,
                 textFieldColors = textFieldColors,
                 bookshelves = bookshelves,
-                onFieldChange = { field, value ->
-                    when (field) {
-                        FieldType.Title -> title = value
-                        FieldType.Author -> author = value
-                        FieldType.Category -> category = value
-                        FieldType.ISBN -> manualIsbn = value
-                        FieldType.CoverUrl -> coverUrl = value
-                        FieldType.Description -> description = value
-                        FieldType.PageCount -> pageCount = value
-                        FieldType.PublishedDate -> publishedDate = value
-                        FieldType.Publisher -> publisher = value
-                    }
-                },
+                selectedBookshelf = bookshelves.find { it.name.equals(form.category, ignoreCase = true) },
+                canAddBook = form.title.isNotBlank(),
+                submitLabel = stringResource(if (book == null) R.string.add_book else R.string.save_book_changes),
+                isEditing = book != null,
+                onDeleteBookClick = { book?.let(onDeleteBookClick) },
+                onFieldChange = onManualBookFieldChange,
                 onAddBookClick = {
                     onAddBookClick(
                         Book(
-                            title = title,
-                            authors = author
+                            title = form.title,
+                            authors = form.author
                                 .split(",")
                                 .map { it.trim() }
                                 .filter { it.isNotEmpty() },
-                            isbn = manualIsbn.ifBlank { null },
-                            coverUrl = coverUrl.ifBlank { null },
-                            description = description.ifBlank { null },
-                            pageCount = pageCount.toIntOrNull(),
-                            publishedDate = publishedDate.ifBlank { null },
-                            publisher = publisher.ifBlank { null },
-                            addMode = AddMode.MANUAL.mode,
-                            volumeId = "",
-                            bookshelfId = bookshelves.find { it.name == category }?.id ?: 0
+                            isbn = form.isbn.ifBlank { null },
+                            coverUrl = form.coverUrl.ifBlank { null },
+                            description = form.description.ifBlank { null },
+                            pageCount = form.pageCount.toIntOrNull(),
+                            publishedDate = form.publishedDate.ifBlank { null },
+                            publisher = form.publisher.ifBlank { null },
+                            addMode = book?.addMode ?: AddMode.MANUAL.mode,
+                            volumeId = book?.volumeId.orEmpty(),
+                            id = book?.id ?: 0,
+                            bookshelfId = bookshelves.find { it.name == form.category }?.id ?: 0
                         ),
-                        category
+                        form.category
                     )
                 }
             )
@@ -185,6 +177,7 @@ fun AddBookBottomSheetContent(
             )
         }
     }
+
 }
 
 @Composable
@@ -264,10 +257,6 @@ private fun ModeChip(
     }
 }
 
-enum class FieldType {
-    Title, Author, Category, ISBN, CoverUrl, Description, PageCount, PublishedDate, Publisher
-}
-
 @Composable
 private fun ManualEntryContent(
     title: String,
@@ -278,14 +267,19 @@ private fun ManualEntryContent(
     description: String,
     pageCount: String,
     publishedDate: String,
-    onFieldChange: (FieldType, String) -> Unit,
+    onFieldChange: (ManualBookField, String) -> Unit,
     publisher: String,
     textFieldColors: TextFieldColors,
     onAddBookClick: () -> Unit,
     bookshelves: List<Bookshelf> = emptyList(),
-    selectedBookshelf: Bookshelf? = null
+    selectedBookshelf: Bookshelf? = null,
+    canAddBook: Boolean,
+    submitLabel: String,
+    isEditing: Boolean,
+    onDeleteBookClick: () -> Unit
 ) {
     val dimens = dimension
+    var showDeleteConfirmation by remember(isEditing) { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -297,7 +291,7 @@ private fun ManualEntryContent(
             placeholder = stringResource(R.string.add_book_title_label),
             value = title,
             onValueChange = {
-                onFieldChange(FieldType.Title, it)
+                onFieldChange(ManualBookField.Title, it)
             },
             fieldLength = TextFieldLength.NAME,
             colors = textFieldColors,
@@ -311,7 +305,7 @@ private fun ManualEntryContent(
             placeholder = stringResource(R.string.add_book_authors_label),
             value = author,
             onValueChange = {
-                onFieldChange(FieldType.Author, it)
+                onFieldChange(ManualBookField.Author, it)
             },
             fieldLength = TextFieldLength.NAME,
             colors = textFieldColors,
@@ -324,7 +318,7 @@ private fun ManualEntryContent(
             label = stringResource(R.string.add_book_bookshelf),
             value = category,
             onValueChange = {
-                onFieldChange(FieldType.Category, it)
+                onFieldChange(ManualBookField.Category, it)
             },
             fieldLength = TextFieldLength.NAME,
             colors = textFieldColors,
@@ -343,7 +337,7 @@ private fun ManualEntryContent(
                     selected = bookshelf == selectedBookshelf,
                     textStyle = CustomTypography.fieldLabel,
                     height = ComponentDimensions.fieldChipHeight,
-                    onClick = { onFieldChange(FieldType.Category, bookshelf.name) }
+                    onClick = { onFieldChange(ManualBookField.Category, bookshelf.name) }
                 )
             }
         }
@@ -354,7 +348,7 @@ private fun ManualEntryContent(
             label = stringResource(R.string.add_book_isbn_optional),
             value = isbn,
             onValueChange = {
-                onFieldChange(FieldType.ISBN, it)
+                onFieldChange(ManualBookField.ISBN, it)
             },
             fieldLength = TextFieldLength.ISBN,
             colors = textFieldColors,
@@ -374,7 +368,7 @@ private fun ManualEntryContent(
         BookCoverUploadCard(
             coverUrl = coverUrl,
             onCoverUrlChange = {
-                onFieldChange(FieldType.CoverUrl, it)
+                onFieldChange(ManualBookField.CoverUrl, it)
             }
         )
 
@@ -385,7 +379,7 @@ private fun ManualEntryContent(
             label = "Description",
             value = description,
             onValueChange = {
-                onFieldChange(FieldType.Description, it)
+                onFieldChange(ManualBookField.Description, it)
             },
             fieldLength = TextFieldLength.LONG_TEXT,
             colors = textFieldColors,
@@ -398,7 +392,7 @@ private fun ManualEntryContent(
             label = "Page Count",
             value = pageCount,
             onValueChange = {
-                onFieldChange(FieldType.PageCount, it)
+                onFieldChange(ManualBookField.PageCount, it)
             },
             fieldLength = TextFieldLength.DEFAULT,
             colors = textFieldColors,
@@ -411,7 +405,7 @@ private fun ManualEntryContent(
             label = "Published Date",
             value = publishedDate,
             onValueChange = {
-                onFieldChange(FieldType.PublishedDate, it)
+                onFieldChange(ManualBookField.PublishedDate, it)
             },
             fieldLength = TextFieldLength.DEFAULT,
             colors = textFieldColors
@@ -423,7 +417,7 @@ private fun ManualEntryContent(
             label = "Publisher",
             value = publisher,
             onValueChange = {
-                onFieldChange(FieldType.Publisher, it)
+                onFieldChange(ManualBookField.Publisher, it)
             },
             fieldLength = TextFieldLength.NAME,
             colors = textFieldColors,
@@ -434,10 +428,35 @@ private fun ManualEntryContent(
 
         ErastosButton(
             onClick = onAddBookClick,
+            enabled = canAddBook,
             modifier = Modifier
                 .fillMaxWidth(),
-            text = stringResource(R.string.add_book),
+            text = submitLabel,
         )
+
+        if (isEditing) {
+            TextButton(onClick = { showDeleteConfirmation = true }) {
+                Text(stringResource(R.string.delete_book))
+            }
+        }
+
+        if (showDeleteConfirmation) {
+            AlertDialog(
+                onDismissRequest = { showDeleteConfirmation = false },
+                title = { Text(stringResource(R.string.delete_book)) },
+                text = { Text(stringResource(R.string.delete_book_confirmation, title)) },
+                confirmButton = {
+                    TextButton(onClick = onDeleteBookClick) {
+                        Text(stringResource(R.string.delete))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteConfirmation = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -503,6 +522,7 @@ private fun SearchOrScanNewBookContent(
             onClick = {
                 onSearchBookClick(query)
             },
+            enabled = query.isNotBlank(),
             modifier = Modifier
                 .fillMaxWidth(),
             text = stringResource(R.string.add_book_search_book),
@@ -528,6 +548,8 @@ private fun AddBookBottomSheetContentPreview() {
                 onDoneClick = {},
                 onScanClick = {},
                 onSearchBookClick = {},
+                form = ManualBookFormState(),
+                onManualBookFieldChange = { _, _ -> },
                 onAddBookClick = { _, _-> }
             )
         }
