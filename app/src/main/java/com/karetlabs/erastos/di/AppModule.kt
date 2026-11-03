@@ -5,6 +5,7 @@ import com.karetlabs.erastos.data.db.AppDatabase
 import com.karetlabs.erastos.data.db.daos.BookDao
 import com.karetlabs.erastos.data.db.daos.BookshelfDao
 import com.karetlabs.erastos.network.ApiService
+import com.karetlabs.erastos.network.OpenLibraryApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -49,5 +50,15 @@ object AppModule {
     @Singleton
     fun provideApiService(retrofit: Retrofit): ApiService {
         return retrofit.create(ApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOpenLibraryApiService(): OpenLibraryApiService {
+        return Retrofit.Builder()
+            .baseUrl("https://openlibrary.org/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(OpenLibraryApiService::class.java)
     }
 }

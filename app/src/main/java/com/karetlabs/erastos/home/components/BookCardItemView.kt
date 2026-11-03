@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -14,9 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
+import com.karetlabs.erastos.R
 import com.karetlabs.erastos.data.model.Book
 import com.karetlabs.erastos.library.getAuthorsString
 import com.karetlabs.erastos.library.ui.theme.ComponentDimensions
@@ -26,17 +29,22 @@ import com.karetlabs.erastos.library.ui.theme.dimension
 @Composable
 fun BookCardItemView(
     book: Book,
+    onClick: () -> Unit = {},
 ) {
     Card(
         shape = RoundedCornerShape(dimension.radiusLarge),
         colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = ComponentDimensions.cardElevation),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
     ) {
         Column {
             AsyncImage(
                 model = book.coverUrl,
                 contentDescription = book.title,
+                placeholder = painterResource(R.drawable.img_book_cover),
+                error = painterResource(R.drawable.img_book_cover),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()

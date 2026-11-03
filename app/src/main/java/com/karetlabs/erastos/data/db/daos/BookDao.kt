@@ -4,6 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
+import androidx.room.Delete
 import com.karetlabs.erastos.data.model.Book
 import kotlinx.coroutines.flow.Flow
 
@@ -17,6 +19,12 @@ interface BookDao {
 
     @Insert(onConflict = OnConflictStrategy.Companion.IGNORE)
     suspend fun insert(book: Book)
+
+    @Update
+    suspend fun update(book: Book)
+
+    @Delete
+    suspend fun delete(book: Book)
 
     @Query("SELECT * FROM books WHERE id = :id")
     fun getBookById(id: Int): Flow<Book>

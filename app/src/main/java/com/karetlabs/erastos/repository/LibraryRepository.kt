@@ -32,6 +32,14 @@ class LibraryRepository @Inject constructor(
         bookDao.insert(book)
     }
 
+    suspend fun updateBook(book: Book) {
+        bookDao.update(book)
+    }
+
+    suspend fun deleteBook(book: Book) {
+        bookDao.delete(book)
+    }
+
     fun getBookById(id: Int): Flow<Book> = bookDao.getBookById(id)
 
     suspend fun searchBooks(query: String): DataResult<VolumesResponse> {

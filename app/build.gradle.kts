@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.serialization)
 }
 
+val googleBooksApiKey = providers.gradleProperty("googleBooksApiKey").orElse("").get()
+
 configurations.all {
     resolutionStrategy.eachDependency {
         if (requested.group == "com.google.mlkit" && requested.name == "barcode-scanning") {
@@ -25,6 +27,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+        buildConfigField("String", "GOOGLE_BOOKS_API_KEY", "\"$googleBooksApiKey\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -50,6 +53,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     packaging {
         resources {

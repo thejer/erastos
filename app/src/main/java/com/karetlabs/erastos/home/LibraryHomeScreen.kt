@@ -40,12 +40,20 @@ import com.karetlabs.erastos.home.components.AddBookBottomSheetContent
 import com.karetlabs.erastos.home.components.BookCardItemView
 import com.karetlabs.erastos.home.components.BooksSearchResultSheetContent
 import com.karetlabs.erastos.home.presentation.BottomSheetType.ADD_BOOK
+import com.karetlabs.erastos.home.presentation.BottomSheetType.BOOK_DETAILS
 import com.karetlabs.erastos.home.presentation.BottomSheetType.ERROR
 import com.karetlabs.erastos.home.presentation.BottomSheetType.NEW_BOOK_SEARCH
 import com.karetlabs.erastos.home.presentation.BottomSheetType.NONE
 import com.karetlabs.erastos.home.presentation.BottomSheetType.SCAN_ISBN
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.AddBookClickEvent
+import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.AddBookManually
+import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.BookClickEvent
+import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.CancelBookEditEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.BookShelfSelectEvent
+import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.CloseBookDetailsEvent
+import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.DeleteBookClickEvent
+import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.EditBookClickEvent
+import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.ManualBookFieldChangedEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.DismissBottomSheetEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.ScanIsbnClickEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.ScreenCreatedEvent
@@ -53,6 +61,7 @@ import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.SelectSear
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.StartNewBookSearchEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenIntent.BookShelfSelectIntent
 import com.karetlabs.erastos.home.presentation.LibraryHomeViewModel
+import com.karetlabs.erastos.home.presentation.ManualBookField
 import com.karetlabs.erastos.home.presentation.SearchType
 import com.karetlabs.erastos.library.getAuthorsString
 import com.karetlabs.erastos.library.presentation.doOnScreenCreate
@@ -73,6 +82,7 @@ fun LibraryHomeScreen(
     viewModel: LibraryHomeViewModel = hiltViewModel()
 ) {
     val viewState by viewModel.observableViewState()
+    val selectedBook = viewState.selectedBook
     doOnScreenCreate {
         viewModel.onEvent(ScreenCreatedEvent)
     }
@@ -83,30 +93,66 @@ fun LibraryHomeScreen(
     }
     HomeView(
         bookshelves = viewState.bookshelves,
-        books = viewState.books,
+        books = if (viewState.selectedBookshelf.name == "All") viewState.books else
+            viewState.books.filter { it.bookshelfId == viewState.selectedBookshelf.id },
         selectedBookshelf = viewState.selectedBookshelf,
         onBookshelfSelected = {
             viewModel.onEvent(BookShelfSelectEvent(it))
         },
-        onAddBookClick = { viewModel.onEvent(AddBookClickEvent) }
+        onAddBookClick = { viewModel.onEvent(AddBookClickEvent) },
+        onBookClick = { viewModel.onEvent(BookClickEvent(it)) }
     )
 
     ErastosBottomSheet(
         visible = viewState.shouldOpenBottomSheet,
-        onDismissRequest = { viewModel.onEvent(DismissBottomSheetEvent) }
+        onDismissRequest = {
+            viewModel.onEvent(
+                when {
+                    viewState.bottomSheetType == BOOK_DETAILS -> CloseBookDetailsEvent
+                    selectedBook != null -> CancelBookEditEvent
+                    else -> DismissBottomSheetEvent
+                }
+            )
+        }
     ) {
         when (viewState.bottomSheetType) {
-            ERROR -> {}
+            ERROR -> Column(Modifier.padding(dimension.screenPaddingHorizontal)) {
+                Text(
+                    text = viewState.errorMessage.ifBlank { "No matching book found. You can add it manually." },
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                androidx.compose.material3.TextButton(onClick = { viewModel.onEvent(AddBookClickEvent) }) {
+                    Text("Add manually")
+                }
+            }
             ADD_BOOK -> {
                 AddBookBottomSheetContent(
-                    onDoneClick = { viewModel.onEvent(DismissBottomSheetEvent) },
+                    bookshelves = viewState.bookshelves.filter { it.name != "All" },
+                    book = viewState.selectedBook,
+                    form = viewState.manualBookForm,
+                    onManualBookFieldChange = { field, value ->
+                        viewModel.onEvent(ManualBookFieldChangedEvent(field, value))
+                    },
+                    onDoneClick = {
+                        viewModel.onEvent(if (selectedBook != null) CancelBookEditEvent else DismissBottomSheetEvent)
+                    },
                     onScanClick = { viewModel.onEvent(ScanIsbnClickEvent) },
                     onSearchBookClick = {
                         viewModel.onEvent(StartNewBookSearchEvent(searchType = SearchType.TITLE, query = it))
                     },
                     onAddBookClick = { book, bookshelf ->
-                        viewModel.onEvent(SelectSearchBookResult(book))
-                    }
+                        viewModel.onEvent(AddBookManually(book, bookshelf))
+                    },
+                    onDeleteBookClick = { book -> viewModel.onEvent(DeleteBookClickEvent(book)) }
+                )
+            }
+
+            BOOK_DETAILS -> selectedBook?.let { book ->
+                BookDetailsScreen(
+                    book = book,
+                    bookshelfName = viewState.bookshelves.find { it.id == book.bookshelfId }?.name,
+                    onBack = { viewModel.onEvent(CloseBookDetailsEvent) },
+                    onEdit = { viewModel.onEvent(EditBookClickEvent) }
                 )
             }
 
@@ -140,7 +186,8 @@ private fun HomeView(
     bookshelves: List<Bookshelf>,
     books: List<Book>,
     onBookshelfSelected: (Bookshelf) -> Unit,
-    onAddBookClick: () -> Unit
+    onAddBookClick: () -> Unit,
+    onBookClick: (Book) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -237,7 +284,7 @@ private fun HomeView(
                     )
                 }
             } else {
-                BooksGrid(books)
+                BooksGrid(books, onBookClick)
             }
         }
     }
@@ -245,7 +292,8 @@ private fun HomeView(
 
 @Composable
 fun BooksGrid(
-    books: List<Book>
+    books: List<Book>,
+    onBookClick: (Book) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -258,8 +306,8 @@ fun BooksGrid(
         horizontalArrangement = Arrangement.spacedBy(dimension.componentSpacingLarge),
     ) {
 
-        items(books, key = { it.title + it.getAuthorsString() }) { book ->
-            BookCardItemView(book = book)
+        items(books, key = { if (it.id != 0) it.id else it.title + it.getAuthorsString() }) { book ->
+            BookCardItemView(book = book, onClick = { onBookClick(book) })
         }
     }
 }
@@ -385,7 +433,8 @@ fun HomePreview() {
             onBookshelfSelected = {},
             selectedBookshelf = Bookshelf(name = "All"),
             books = emptyList(),
-            onAddBookClick = {}
+            onAddBookClick = {},
+            onBookClick = {}
         )
     }
 }
@@ -396,7 +445,7 @@ fun HomePreview() {
 private fun BooksGridPreview() {
     val books = previewBooks()
     ErastosTheme {
-        BooksGrid(books)
+        BooksGrid(books, onBookClick = {})
     }
 }
 
