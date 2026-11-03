@@ -78,7 +78,8 @@ import com.karetlabs.erastos.library.ui.theme.typography
 
 @Composable
 fun LibraryHomeScreen(
-    viewModel: LibraryHomeViewModel = hiltViewModel()
+    viewModel: LibraryHomeViewModel = hiltViewModel(),
+    onSignOut: () -> Unit = {}
 ) {
     val viewState by viewModel.observableViewState()
     val selectedBook = viewState.selectedBook
@@ -99,7 +100,8 @@ fun LibraryHomeScreen(
             viewModel.onEvent(BookShelfSelectEvent(it))
         },
         onAddBookClick = { viewModel.onEvent(AddBookClickEvent) },
-        onBookClick = { viewModel.onEvent(BookClickEvent(it)) }
+        onBookClick = { viewModel.onEvent(BookClickEvent(it)) },
+        onSignOut = onSignOut
     )
 
     ErastosBottomSheet(
@@ -220,13 +222,14 @@ private fun HomeView(
     books: List<Book>,
     onBookshelfSelected: (Bookshelf) -> Unit,
     onAddBookClick: () -> Unit,
-    onBookClick: (Book) -> Unit
+    onBookClick: (Book) -> Unit,
+    onSignOut: () -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
         topBar = {
-            HomeTopBar(books.size)
+            HomeTopBar(books.size, onSignOut)
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -346,7 +349,7 @@ fun BooksGrid(
 }
 
 @Composable
-private fun HomeTopBar(bookCount: Int) {
+private fun HomeTopBar(bookCount: Int, onSignOut: () -> Unit = {}) {
     val colorScheme = MaterialTheme.colorScheme
 
     Column(
@@ -357,11 +360,17 @@ private fun HomeTopBar(bookCount: Int) {
             .padding(top = dimension.screenPaddingVertical, bottom = dimension.paddingSmall),
     ) {
 
-        Text(
-            text = stringResource(R.string.app_name_erastos),
-            style = typography.headlineLarge,
-            color = colorScheme.onBackground
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.app_name_erastos),
+                style = typography.headlineLarge,
+                color = colorScheme.onBackground,
+                modifier = Modifier.weight(1f)
+            )
+            androidx.compose.material3.TextButton(onClick = onSignOut) {
+                Text("Sign out")
+            }
+        }
 
         Spacer(Modifier.height(dimension.componentSpacingSmall))
 
