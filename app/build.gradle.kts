@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -8,6 +10,17 @@ plugins {
 }
 
 val googleBooksApiKey = providers.gradleProperty("googleBooksApiKey").orElse("").get()
+val supabaseLocalProperties = Properties()
+rootProject.file("local.properties")
+    .takeIf { it.exists() }
+    ?.inputStream()
+    ?.use { supabaseLocalProperties.load(it) }
+
+fun String.asBuildConfigString(): String =
+    "\"${replace("\\", "\\\\").replace("\"", "\\\"")}\""
+
+val supabaseUrl = supabaseLocalProperties.getProperty("SUPABASE_URL", "")
+val supabasePublishableKey = supabaseLocalProperties.getProperty("SUPABASE_PUBLISHABLE_KEY", "")
 
 configurations.all {
     resolutionStrategy.eachDependency {
@@ -28,6 +41,12 @@ android {
         versionCode = 1
         versionName = "1.0"
         buildConfigField("String", "GOOGLE_BOOKS_API_KEY", "\"$googleBooksApiKey\"")
+        buildConfigField("String", "SUPABASE_URL", supabaseUrl.asBuildConfigString())
+        buildConfigField(
+            "String",
+            "SUPABASE_PUBLISHABLE_KEY",
+            supabasePublishableKey.asBuildConfigString()
+        )
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -63,6 +82,11 @@ android {
 }
 
 dependencies {
+
+    implementation(platform(libs.supabase.bom))
+    implementation(libs.supabase.auth)
+    implementation(libs.supabase.postgrest)
+    implementation(libs.ktor.client.android)
 
     implementation(libs.kotlinx.serialization)
     implementation(libs.core.ktx)

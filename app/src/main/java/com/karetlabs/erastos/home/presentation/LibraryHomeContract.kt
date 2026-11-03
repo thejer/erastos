@@ -40,6 +40,7 @@ data class HomeScreenViewState(
     val selectedBookshelf: Bookshelf = Bookshelf(name = "All"),
     val selectedBook: Book? = null,
     val isBookDetailsVisible: Boolean = false,
+    val isBookEditVisible: Boolean = false,
     val manualBookForm: ManualBookFormState = ManualBookFormState(),
     val shouldOpenBottomSheet: Boolean = false,
     val bottomSheetType: BottomSheetType = BottomSheetType.NONE,

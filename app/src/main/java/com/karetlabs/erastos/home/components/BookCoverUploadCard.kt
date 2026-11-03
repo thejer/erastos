@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -56,6 +57,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.karetlabs.erastos.R
 import com.karetlabs.erastos.library.ui.DevicePreviews
 import com.karetlabs.erastos.library.ui.components.ErastosLabeledTextField
@@ -238,16 +240,29 @@ fun UploadImageView(
                             launchCoverPicker()
                         }
                 ) {
-                    Icon(
+                    if (tempUrl.startsWith("http", ignoreCase = true)) {
+                        AsyncImage(
+                            model = tempUrl,
+                            contentDescription = "Book cover preview",
+                            placeholder = painterResource(R.drawable.img_book_cover),
+                            error = painterResource(R.drawable.img_book_cover),
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .width(ComponentDimensions.bookCoverWidthLarge)
+                                .aspectRatio(0.63f)
+                                .clip(RoundedCornerShape(dimension.radiusBase))
+                        )
+                        Spacer(Modifier.height(dimension.componentSpacingSmall))
+                    } else Icon(
                         painter = painterResource(R.drawable.ic_cloud_upload),
                         contentDescription = null,
                         tint = colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(ComponentDimensions.iconSizeMedium)
                     )
 
-                    Spacer(Modifier.height(dimension.componentSpacingMedium))
+                    if (!tempUrl.startsWith("http", ignoreCase = true)) Spacer(Modifier.height(dimension.componentSpacingMedium))
 
-                    Text(
+                    if (!tempUrl.startsWith("http", ignoreCase = true)) Text(
                         text = "Click to upload",
                         style = typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
                         color = colorScheme.onSurfaceVariant,
@@ -256,7 +271,7 @@ fun UploadImageView(
 
                     Spacer(Modifier.height(dimension.paddingTiny))
 
-                    Text(
+                    if (!tempUrl.startsWith("http", ignoreCase = true)) Text(
                         text = "PNG or JPG",
                         style = CustomTypography.metadata,
                         color = colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
