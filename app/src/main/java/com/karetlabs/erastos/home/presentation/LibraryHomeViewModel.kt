@@ -2,8 +2,6 @@ package com.karetlabs.erastos.home.presentation
 
 import android.content.Context
 import android.net.Uri
-import dagger.hilt.android.qualifiers.ApplicationContext
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.karetlabs.erastos.data.model.Book
@@ -13,18 +11,18 @@ import com.karetlabs.erastos.home.presentation.BottomSheetType.NEW_BOOK_SEARCH
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.AddBookClickEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.AddBookManually
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.BookClickEvent
-import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.CloseBookDetailsEvent
-import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.EditBookClickEvent
-import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.CancelBookEditEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.BookShelfSelectEvent
-import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.DismissBottomSheetEvent
+import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.CancelBookEditEvent
+import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.CloseBookDetailsEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.DeleteBookClickEvent
+import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.DismissBottomSheetEvent
+import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.EditBookClickEvent
+import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.ManualBookFieldChangedEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.ScanIsbnClickEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.ScreenCreatedEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.SearchQueryChangeEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.SelectSearchBookResult
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.StartNewBookSearchEvent
-import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.ManualBookFieldChangedEvent
 import com.karetlabs.erastos.library.presentation.mvi.HasEvents
 import com.karetlabs.erastos.library.presentation.mvi.HasIntents
 import com.karetlabs.erastos.library.presentation.mvi.HasIntentsImpl
@@ -32,8 +30,9 @@ import com.karetlabs.erastos.library.presentation.mvi.HasState
 import com.karetlabs.erastos.library.presentation.mvi.HasStateImpl
 import com.karetlabs.erastos.network.util.DataResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
@@ -60,6 +59,7 @@ class LibraryHomeViewModel @Inject constructor(
                 it.copy(
                     selectedBook = null,
                     isBookDetailsVisible = false,
+                    isBookEditVisible = false,
                     manualBookForm = ManualBookFormState.from(null, it.selectedBookshelf.name.takeUnless { name -> name == "All" }.orEmpty()),
                     shouldOpenBottomSheet = true,
                     bottomSheetType = BottomSheetType.ADD_BOOK
@@ -69,6 +69,7 @@ class LibraryHomeViewModel @Inject constructor(
                 it.copy(
                     selectedBook = null,
                     isBookDetailsVisible = false,
+                    isBookEditVisible = false,
                     manualBookForm = ManualBookFormState(),
                     shouldOpenBottomSheet = false,
                     bottomSheetType = BottomSheetType.NONE
@@ -79,6 +80,7 @@ class LibraryHomeViewModel @Inject constructor(
                     selectedBook = null,
                     manualBookForm = ManualBookFormState(),
                     isBookDetailsVisible = false,
+                    isBookEditVisible = false,
                     shouldOpenBottomSheet = false,
                     bottomSheetType = BottomSheetType.NONE
                 )
@@ -86,15 +88,17 @@ class LibraryHomeViewModel @Inject constructor(
             EditBookClickEvent -> updateState {
                 if (it.selectedBook == null) it else it.copy(
                     isBookDetailsVisible = false,
-                    shouldOpenBottomSheet = true,
-                    bottomSheetType = BottomSheetType.ADD_BOOK
+                    isBookEditVisible = true,
+                    shouldOpenBottomSheet = false,
+                    bottomSheetType = BottomSheetType.NONE
                 )
             }
             CancelBookEditEvent -> updateState {
                 it.copy(
-                    shouldOpenBottomSheet = it.selectedBook != null,
-                    bottomSheetType = if (it.selectedBook != null) BottomSheetType.BOOK_DETAILS else BottomSheetType.NONE,
-                    isBookDetailsVisible = it.selectedBook != null
+                    shouldOpenBottomSheet = false,
+                    bottomSheetType = BottomSheetType.NONE,
+                    isBookDetailsVisible = it.selectedBook != null,
+                    isBookEditVisible = false
                 )
             }
             ScanIsbnClickEvent -> showHideBottomSheet(true, BottomSheetType.SCAN_ISBN)
@@ -105,8 +109,9 @@ class LibraryHomeViewModel @Inject constructor(
                     selectedBook = event.book,
                     manualBookForm = ManualBookFormState.from(event.book, shelfName),
                     isBookDetailsVisible = true,
-                    shouldOpenBottomSheet = true,
-                    bottomSheetType = BottomSheetType.BOOK_DETAILS
+                    isBookEditVisible = false,
+                    shouldOpenBottomSheet = false,
+                    bottomSheetType = BottomSheetType.NONE
                 )
             }
             is BookShelfSelectEvent -> updateState { it.copy(selectedBookshelf = event.bookshelf) }
@@ -160,12 +165,21 @@ class LibraryHomeViewModel @Inject constructor(
                 else -> addBookshelfUseCase(Bookshelf(name = shelfName)).toInt()
             }
             val savedBook = book.copy(coverUrl = persistLocalCover(book.coverUrl), bookshelfId = bookshelfId)
-            if (book.id == 0) addBookUseCase(savedBook) else updateBookUseCase(savedBook)
+            val isEditing = book.id != 0
+            if (isEditing) updateBookUseCase(savedBook) else addBookUseCase(savedBook)
             updateState {
-                it.copy(
+                if (isEditing) it.copy(
+                    selectedBook = savedBook,
+                    manualBookForm = ManualBookFormState.from(savedBook, shelfName),
+                    isBookDetailsVisible = true,
+                    isBookEditVisible = false,
+                    shouldOpenBottomSheet = false,
+                    bottomSheetType = BottomSheetType.NONE
+                ) else it.copy(
                     selectedBook = null,
                     manualBookForm = ManualBookFormState(),
                     isBookDetailsVisible = false,
+                    isBookEditVisible = false,
                     shouldOpenBottomSheet = false,
                     bottomSheetType = BottomSheetType.NONE
                 )
@@ -180,6 +194,8 @@ class LibraryHomeViewModel @Inject constructor(
                 it.copy(
                     selectedBook = null,
                     manualBookForm = ManualBookFormState(),
+                    isBookDetailsVisible = false,
+                    isBookEditVisible = false,
                     shouldOpenBottomSheet = false,
                     bottomSheetType = BottomSheetType.NONE
                 )

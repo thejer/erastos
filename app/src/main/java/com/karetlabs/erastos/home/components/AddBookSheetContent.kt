@@ -19,8 +19,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -42,6 +42,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import com.karetlabs.erastos.R
 import com.karetlabs.erastos.data.model.Book
 import com.karetlabs.erastos.data.model.Bookshelf
@@ -383,7 +384,9 @@ private fun ManualEntryContent(
             },
             fieldLength = TextFieldLength.LONG_TEXT,
             colors = textFieldColors,
-            keyboardCapitalization = KeyboardCapitalization.Sentences
+            keyboardCapitalization = KeyboardCapitalization.Sentences,
+            singleLine = false,
+            height = 160.dp
         )
 
         Spacer(Modifier.height(dimens.componentSpacingMedium))

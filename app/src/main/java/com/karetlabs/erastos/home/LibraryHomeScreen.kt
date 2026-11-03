@@ -48,20 +48,19 @@ import com.karetlabs.erastos.home.presentation.BottomSheetType.SCAN_ISBN
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.AddBookClickEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.AddBookManually
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.BookClickEvent
-import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.CancelBookEditEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.BookShelfSelectEvent
+import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.CancelBookEditEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.CloseBookDetailsEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.DeleteBookClickEvent
+import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.DismissBottomSheetEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.EditBookClickEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.ManualBookFieldChangedEvent
-import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.DismissBottomSheetEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.ScanIsbnClickEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.ScreenCreatedEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.SelectSearchBookResult
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenEvent.StartNewBookSearchEvent
 import com.karetlabs.erastos.home.presentation.LibraryHomeScreenIntent.BookShelfSelectIntent
 import com.karetlabs.erastos.home.presentation.LibraryHomeViewModel
-import com.karetlabs.erastos.home.presentation.ManualBookField
 import com.karetlabs.erastos.home.presentation.SearchType
 import com.karetlabs.erastos.library.getAuthorsString
 import com.karetlabs.erastos.library.presentation.doOnScreenCreate
@@ -91,7 +90,7 @@ fun LibraryHomeScreen(
             is BookShelfSelectIntent -> {}
         }
     }
-    HomeView(
+    if (!viewState.isBookDetailsVisible && !viewState.isBookEditVisible) HomeView(
         bookshelves = viewState.bookshelves,
         books = if (viewState.selectedBookshelf.name == "All") viewState.books else
             viewState.books.filter { it.bookshelfId == viewState.selectedBookshelf.id },
@@ -104,7 +103,7 @@ fun LibraryHomeScreen(
     )
 
     ErastosBottomSheet(
-        visible = viewState.shouldOpenBottomSheet,
+        visible = viewState.shouldOpenBottomSheet && !viewState.isBookDetailsVisible && !viewState.isBookEditVisible,
         onDismissRequest = {
             viewModel.onEvent(
                 when {
@@ -152,7 +151,8 @@ fun LibraryHomeScreen(
                     book = book,
                     bookshelfName = viewState.bookshelves.find { it.id == book.bookshelfId }?.name,
                     onBack = { viewModel.onEvent(CloseBookDetailsEvent) },
-                    onEdit = { viewModel.onEvent(EditBookClickEvent) }
+                    onEdit = { viewModel.onEvent(EditBookClickEvent) },
+                    onDelete = { viewModel.onEvent(DeleteBookClickEvent(book)) }
                 )
             }
 
@@ -176,6 +176,39 @@ fun LibraryHomeScreen(
             }
 
             NONE -> Unit
+        }
+    }
+
+    if (viewState.isBookDetailsVisible) {
+        selectedBook?.let { book ->
+            BookDetailsScreen(
+                book = book,
+                bookshelfName = viewState.bookshelves.find { it.id == book.bookshelfId }?.name,
+                onBack = { viewModel.onEvent(CloseBookDetailsEvent) },
+                onEdit = { viewModel.onEvent(EditBookClickEvent) },
+                onDelete = { viewModel.onEvent(DeleteBookClickEvent(book)) }
+            )
+        }
+    }
+
+    if (viewState.isBookEditVisible) {
+        selectedBook?.let { book ->
+            AddBookBottomSheetContent(
+                modifier = Modifier.fillMaxSize().statusBarsPadding(),
+                bookshelves = viewState.bookshelves.filter { it.name != "All" },
+                book = book,
+                form = viewState.manualBookForm,
+                onManualBookFieldChange = { field, value ->
+                    viewModel.onEvent(ManualBookFieldChangedEvent(field, value))
+                },
+                onDoneClick = { viewModel.onEvent(CancelBookEditEvent) },
+                onScanClick = {},
+                onSearchBookClick = {},
+                onAddBookClick = { editedBook, shelfName ->
+                    viewModel.onEvent(AddBookManually(editedBook, shelfName))
+                },
+                onDeleteBookClick = { editedBook -> viewModel.onEvent(DeleteBookClickEvent(editedBook)) }
+            )
         }
     }
 }

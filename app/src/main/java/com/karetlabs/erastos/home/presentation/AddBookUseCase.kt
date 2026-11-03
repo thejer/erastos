@@ -10,4 +10,8 @@ class AddBookUseCase @Inject constructor(
     suspend operator fun invoke(book: Book) {
         libraryRepository.insertBook(book)
     }
+
+    suspend fun update(book: Book) = libraryRepository.updateBook(book)
+
+    suspend fun delete(book: Book) = libraryRepository.deleteBook(book)
 }
