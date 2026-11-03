@@ -1,5 +1,6 @@
 package com.karetlabs.erastos.data.source.remote
 
+import com.karetlabs.erastos.auth.AuthDeepLink
 import com.karetlabs.erastos.data.model.Book
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
@@ -45,7 +46,7 @@ class SupabaseLibraryRemoteDataSource @Inject constructor(
     val authSessionStatus get() = client.auth.sessionStatus
 
     suspend fun signUp(email: String, password: String) {
-        client.auth.signUpWith(Email) {
+        client.auth.signUpWith(Email, redirectUrl = AuthDeepLink.CALLBACK_URL) {
             this.email = email
             this.password = password
         }
@@ -56,6 +57,14 @@ class SupabaseLibraryRemoteDataSource @Inject constructor(
             this.email = email
             this.password = password
         }
+    }
+
+    suspend fun requestPasswordReset(email: String) {
+        client.auth.resetPasswordForEmail(email, redirectUrl = AuthDeepLink.PASSWORD_RECOVERY_URL)
+    }
+
+    suspend fun updatePassword(password: String) {
+        client.auth.updateUser { this.password = password }
     }
 
     suspend fun signOut() {

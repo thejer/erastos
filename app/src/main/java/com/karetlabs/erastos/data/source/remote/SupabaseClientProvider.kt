@@ -1,6 +1,7 @@
 package com.karetlabs.erastos.data.source.remote
 
 import com.karetlabs.erastos.BuildConfig
+import com.karetlabs.erastos.auth.AuthDeepLink
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
@@ -21,7 +22,10 @@ class SupabaseClientProvider @Inject constructor() {
             supabaseUrl = url,
             supabaseKey = publishableKey
         ) {
-            install(Auth)
+            install(Auth) {
+                scheme = AuthDeepLink.SCHEME
+                host = AuthDeepLink.HOST
+            }
             install(Postgrest)
         }
     }

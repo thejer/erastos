@@ -32,6 +32,10 @@ class LibraryRepository @Inject constructor(
 
     suspend fun signIn(email: String, password: String) = supabaseRemoteDataSource.signIn(email, password)
 
+    suspend fun requestPasswordReset(email: String) = supabaseRemoteDataSource.requestPasswordReset(email)
+
+    suspend fun updatePassword(password: String) = supabaseRemoteDataSource.updatePassword(password)
+
     suspend fun signOut() = supabaseRemoteDataSource.signOut()
 
     suspend fun getCloudBookshelves(): List<CloudBookshelf> = supabaseRemoteDataSource.getBookshelves()
